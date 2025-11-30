@@ -20,7 +20,7 @@ void play_music(const char* filename) {
 
 void playBackgroundMusic(void) {
     // file music
-    play_music("assets/background.wav");
+    // play_music("assets/background.wav");
 }
 
 void stopBackgroundMusic(void) {
