@@ -48,7 +48,7 @@ int isWall(int x, int y) {
     return gameMap[y][x] == '#';
 }
 
-// Kiểm tra có phải exit không
+// Kiểm tra exit
 int isExit(int x, int y) {
     return (x == exitX && y == exitY);
 }
