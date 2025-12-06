@@ -15,9 +15,6 @@ void initEnemy(Enemy *e, int x, int y) {
 void updateEnemy(Enemy *e, int playerX, int playerY) {
     if (!e->alive) return;
 
-    moveCounter++;
-    if (moveCounter < ENEMY_SPEED) return;
-    moveCounter = 0;
 
     int newX = e->x;
     int newY = e->y;

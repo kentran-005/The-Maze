@@ -22,10 +22,11 @@ clean:
 
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
-	game.exe
+	@$(TARGET)
 else
-	./game
+	@./$(TARGET)
 endif
+
 
 # compile: make
 # clean: make clean
