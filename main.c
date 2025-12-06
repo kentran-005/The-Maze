@@ -1,16 +1,24 @@
 #include <stdio.h>
+#include "game.h"
 #include "audio.h"
 
 int main() {
-    printf("Starting game...\n");
+    char choice;
     
-    playBackgroundMusic();
-    // Bắt đầu game ở đây
-    printf("Game running...\n");
-    getchar(); // Chờ người dùng nhấn Enter
+    do {
+        printf("Starting game...\n");
+        playBackgroundMusic();
+        
+        startGame();
+        
+        stopBackgroundMusic();
+        
+        printf("\nChoi lai? (y/n): ");
+        scanf(" %c", &choice);
+        getchar(); // Clear buffer
+        
+    } while (choice == 'y' || choice == 'Y');
     
-    stopBackgroundMusic();
-    
-    printf("Game ended.\n");
+    printf("\nCam on da choi!\n");
     return 0;
 }
