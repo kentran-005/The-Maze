@@ -1,6 +1,3 @@
-/* ===========================
-   FILE: map.c
-   =========================== */
 #include "map.h"
 #include <stdio.h>
 #include <stdlib.h>
