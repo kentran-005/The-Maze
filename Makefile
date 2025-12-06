@@ -30,3 +30,6 @@ endif
 # compile: make
 # clean: make clean
 # run: make run
+
+# windows run: mingw32-make run
+# windows clean: mingw32-make clean
