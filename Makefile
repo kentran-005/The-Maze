@@ -8,7 +8,7 @@ ifeq ($(OS),Windows_NT)
     RM = del /Q
 else
     TARGET = game
-    LIBS = 
+    LIBS =
     RM = rm -f
 endif
 
@@ -20,12 +20,16 @@ $(TARGET): $(SRC)
 clean:
 	$(RM) $(TARGET)
 
+# PHẦN QUAN TRỌNG – SỬA ĐÚNG CÚ PHÁP
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
-	$(TARGET)
+	@$(TARGET)
 else
-	./$(TARGET)
+	@./$(TARGET)
 endif
+
+.PHONY: all clean run
+
 
 
 # compile: make
