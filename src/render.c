@@ -3,23 +3,28 @@
 #include "render.h"
 #include "map.h"
 
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 void clearScreen() {
 #ifdef _WIN32
-    // Use Windows API to clear screen and reset cursor
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = {0, 0};
-    DWORD written;
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-    
-    GetConsoleScreenBufferInfo(h, &csbi);
-    FillConsoleOutputCharacter(h, ' ', csbi.dwSize.X * csbi.dwSize.Y, pos, &written);
-    SetConsoleCursorPosition(h, pos);
+    DWORD count;
+    DWORD cellCount;
+    COORD homeCoords = { 0, 0 };
+
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) return;
+    cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+
+    FillConsoleOutputCharacter(hConsole, ' ', cellCount, homeCoords, &count);
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, homeCoords, &count);
+
+    SetConsoleCursorPosition(hConsole, homeCoords);
 #else
-    printf("\033[2J\033[1;1H");
+    printf("\033[2J\033[H");
     fflush(stdout);
 #endif
 }

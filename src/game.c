@@ -154,10 +154,10 @@ void startGame()
     Enemy enemies[MAX_ENEMIES];
 
     int spawnPositions[4][2] = {
-        {15, 8},   // Vị trí cũ của enemy trong map.c → an toàn
-        {8,  14},  // Góc dưới trái
-        {12, 4},   // Trên giữa
-        {17, 12}  // Gần exit → tăng độ khó
+        {15, 8}, // Vị trí cũ của enemy trong map.c → an toàn
+        {8, 14}, // Góc dưới trái
+        {12, 4}, // Trên giữa
+        {17, 12} // Gần exit → tăng độ khó
     };
 
     for (int i = 0; i < numEnemies; i++)
@@ -187,10 +187,21 @@ void startGame()
     _getch();
     clearScreen();
 
+#ifdef _WIN32
+    {
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        SetConsoleMode(hOut, dwMode);
+        SetConsoleOutputCP(65001);
+    }
+#endif
+    elapsed = (int)(time(NULL) - startTime);
+
     while (running)
     {
         // Cập nhật thời gian thực (wall time)
-        elapsed = (int)(time(NULL) - startTime);
 
         // Giảm oxy mỗi khi qua 1 giây mới
         if (elapsed > prevElapsed)
@@ -270,20 +281,42 @@ void startGame()
 #endif
                     break;
                 }
+                if (!running)
+                    break;
             }
         }
-        if (!running)
-            break;
-        if (enemyMoved)
+
+        if (enemyMoved || _kbhit())
+        {
+            if (_kbhit())
+            {
+                char key = _getch();
+                int oldX = x, oldY = y;
+                handleInput(key, &x, &y, &running);
+                if (x != oldX || y != oldY)
+                    needsRedraw = 1;
+                if (isExit(x, y))
+                { /* thắng */
+                    running = 0;
+                }
+            }
             needsRedraw = 1;
+        }
+        if (elapsed > prevElapsed)
+        {
+            prevElapsed = elapsed;
+            oxy--;
+            needsRedraw = 1;
+        }
 
         // === VẼ LẠI MÀN HÌNH ===
-        if (needsRedraw) {
+        if (needsRedraw)
+        {
             clearScreen();
             printf("╔═══════════════════════════════════════════════════════╗\n");
             printf("║         ESCAPE THE MAZE - SURVIVE!                    ║\n");
             printf("╚═══════════════════════════════════════════════════════╝\n");
-            printf("Thoi gian: %3d/%d giay  |  Quai vat: %d  |  Oxy: %d%%\n\n", 
+            printf("Thoi gian: %3d/%d giay  |  Quai vat: %d  |  Oxy: %d%%\n\n",
                    elapsed, TIME_LIMIT, numEnemies, oxy);
 
             drawOxyBar(oxy);
@@ -296,7 +329,8 @@ void startGame()
             printf("║         Tim chu 'E' de thoat khoi me cung!      ║\n");
             printf("╚═══════════════════════════════════════════════════╝\n");
 
-            needsRedraw = 0;  // Quan trọng: reset cờ sau khi vẽ
+            needsRedraw = 0; // Quan trọng: reset cờ sau khi vẽ
+            fflush(stdout);
         }
         // === XỬ LÝ INPUT ===
         if (_kbhit())
@@ -341,9 +375,9 @@ void startGame()
 
 // Delay nhỏ để game mượt, không ăn CPU
 #ifdef _WIN32
-        Sleep(100); // 100ms là ổn nhất (trước bạn dùng 50ms → quá nhanh, dễ flicker)
+        Sleep(200);
 #else
-        usleep(100000);
+        usleep(2000000);
 #endif
     }
 }
