@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ENEMY_SPEED 2
+#define ENEMY_SPEED 3
 #define CHASE_RANGE 8
 #define DIR_CHANGE 8
 #define RANDOM_CHANCE 30
@@ -14,7 +14,6 @@ void initEnemy(Enemy *e, int x, int y) {
     e->y = y;
     e->alive = 1;
     
-    // Khởi tạo các biến RIÊNG của enemy này
     e->moveCounter = 0;
     e->currentDir = rand() % 4;
     e->dirCounter = 0;
@@ -47,6 +46,13 @@ void addToHistory(Enemy *e, int x, int y) {
     e->historyIndex = (e->historyIndex + 1) % HISTORY_SIZE;
 }
 
+int isValidMove(int x, int y) {
+    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) {
+        return 0;
+    }
+    return !isWall(x, y);
+}
+
 void updateEnemy(Enemy *e, int playerX, int playerY) {
     if (!e->alive) return;
 
@@ -68,7 +74,6 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
         int useRandom = (rand() % 100) < RANDOM_CHANCE;
         
         if (useRandom) {
-            // DI CHUYỂN RANDOM
             int validDirs[4];
             int validCount = 0;
             
@@ -76,7 +81,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 int newX = e->x + directions[i][0];
                 int newY = e->y + directions[i][1];
                 
-                if (!isWall(newX, newY) && !isInHistory(e, newX, newY)) {
+                if (isValidMove(newX, newY) && !isInHistory(e, newX, newY)) {
                     validDirs[validCount++] = i;
                 }
             }
@@ -90,7 +95,6 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 e->dirCounter = 0;
             }
         } else {
-            // ĐUỔI PLAYER
             int bestDir = -1;
             int bestDist = 999;
             
@@ -98,7 +102,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 int newX = e->x + directions[i][0];
                 int newY = e->y + directions[i][1];
                 
-                if (isWall(newX, newY)) continue;
+                if (!isValidMove(newX, newY)) continue;
                 
                 int newDist = getDistance(newX, newY, playerX, playerY);
                 if (newDist < bestDist) {
@@ -126,7 +130,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
         
         int suddenChange = (rand() % 100) < (RANDOM_CHANCE / 2);
         
-        if (isWall(newX, newY) || e->dirCounter >= DIR_CHANGE || willBeStuck || suddenChange) {
+        if (!isValidMove(newX, newY) || e->dirCounter >= DIR_CHANGE || willBeStuck || suddenChange) {
             int validDirs[4];
             int validCount = 0;
             
@@ -134,7 +138,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 int testX = e->x + directions[i][0];
                 int testY = e->y + directions[i][1];
                 
-                if (!isWall(testX, testY) && !isInHistory(e, testX, testY)) {
+                if (isValidMove(testX, testY) && !isInHistory(e, testX, testY)) {
                     validDirs[validCount++] = i;
                 }
             }

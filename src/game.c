@@ -8,7 +8,6 @@
 #include <termios.h>
 #include <fcntl.h>
 
-/* POSIX implementation of _kbhit() */
 static int kbhit_posix(void) {
     struct termios oldt, newt;
     int ch;
@@ -34,7 +33,6 @@ static int kbhit_posix(void) {
     return 0;
 }
 
-/* POSIX implementation of _getch() */
 static int getch_posix(void) {
     struct termios oldt, newt;
     int ch;
@@ -47,11 +45,8 @@ static int getch_posix(void) {
     return ch;
 }
 
-/* map the names used in Windows code to POSIX versions */
 #define _kbhit() kbhit_posix()
 #define _getch() getch_posix()
-
-/* map Sleep(ms) to usleep on POSIX */
 #define Sleep(ms) usleep((ms) * 1000)
 #endif
 
@@ -62,12 +57,10 @@ static int getch_posix(void) {
 #include "enemy.h"
 #include "map.h"
 
-/* logic game */
 #define MAX_OXY 100
-#define TIME_LIMIT 180
+#define TIME_LIMIT 240
 #define MAX_ENEMIES 4
 
-/* draw oxy bar */
 void drawOxyBar(int oxy) {
     int bars = 20;
     int filled = oxy * bars / 100;
@@ -87,7 +80,6 @@ void drawOxyBar(int oxy) {
     }
 }
 
-/* Menu chon do kho */
 int selectDifficulty() {
     clearScreen();
     printf("\n");
@@ -106,7 +98,6 @@ int selectDifficulty() {
     while (1) {
         choice = getchar();
         if (choice == '1' || choice == '2' || choice == '3') {
-            // Clear buffer
             int c;
             while ((c = getchar()) != '\n' && c != EOF);
             return choice - '0';
@@ -114,16 +105,14 @@ int selectDifficulty() {
     }
 }
 
-/* start game */
 void startGame() {
-    // Chon do kho
     int difficulty = selectDifficulty();
     int numEnemies = 0;
     
     switch(difficulty) {
-        case 1: numEnemies = 1; break;  // De
-        case 2: numEnemies = 2; break;  // Trung binh
-        case 3: numEnemies = 4; break;  // Kho
+        case 1: numEnemies = 1; break;
+        case 2: numEnemies = 2; break;
+        case 3: numEnemies = 4; break;
         default: numEnemies = 1;
     }
     
@@ -135,23 +124,19 @@ void startGame() {
     
     srand((unsigned int)startTime);
     
-    // Khoi tao mang enemies
     Enemy enemies[MAX_ENEMIES];
     
-    // Vi tri spawn cho cac enemy (tranh trung voi player va exit)
     int spawnPositions[4][2] = {
-        {enemyStartX, enemyStartY},      // Enemy 1: vi tri goc
-        {enemyStartX - 5, enemyStartY},  // Enemy 2: ben trai
-        {enemyStartX, enemyStartY - 5},  // Enemy 3: phia tren
-        {enemyStartX + 3, enemyStartY + 3} // Enemy 4: goc khac
+        {20, 8},      // Enemy 1
+        {15, 15},     // Enemy 2
+        {10, 5},      // Enemy 3
+        {25, 12}      // Enemy 4
     };
     
-    // Khoi tao so luong enemy theo do kho
     for (int i = 0; i < numEnemies; i++) {
         initEnemy(&enemies[i], spawnPositions[i][0], spawnPositions[i][1]);
     }
     
-    // Hien thi man hinh bat dau
     clearScreen();
     printf("\n╔═══════════════════════════════════════════╗\n");
     if (difficulty == 1) {
@@ -168,11 +153,9 @@ void startGame() {
     while (running) {
         int elapsed = (int)(time(NULL) - startTime);
         
-        // OXY giam theo thoi gian
         oxy = MAX_OXY - (elapsed * MAX_OXY / TIME_LIMIT);
         if (oxy < 0) oxy = 0;
         
-        // Het OXY → Failed
         if (oxy <= 0) {
             clearScreen();
             printf("\n╔═══════════════════════════════════════╗\n");
@@ -189,7 +172,6 @@ void startGame() {
             break;
         }
         
-        // Cap nhat va kiem tra va cham voi TAT CA enemies
         for (int i = 0; i < numEnemies; i++) {
             if (enemies[i].alive) {
                 updateEnemy(&enemies[i], x, y);
@@ -215,7 +197,6 @@ void startGame() {
         
         if (!running) break;
         
-        // Render
         clearScreen();
         printf("╔═══════════════════════════════════════╗\n");
         printf("║      ESCAPE THE MAZE GAME             ║\n");
@@ -226,7 +207,6 @@ void startGame() {
         drawOxyBar(oxy);
         printf("\n");
         
-        // Ve map voi TAT CA enemies
         drawMapWithMultipleEnemies(x, y, enemies, numEnemies);
         
         printf("\n╔═══════════════════════════════════════╗\n");
@@ -234,12 +214,10 @@ void startGame() {
         printf("║ Muc tieu: Tim loi thoat (E)!         ║\n");
         printf("╚═══════════════════════════════════════╝\n");
         
-        // Xu ly input
         if (_kbhit()) {
             char key = _getch();
             handleInput(key, &x, &y, &running);
             
-            // Kiem tra WIN
             if (isExit(x, y)) {
                 clearScreen();
                 printf("\n╔═══════════════════════════════════════╗\n");
@@ -264,9 +242,9 @@ void startGame() {
         }
 
         #ifdef _WIN32
-        Sleep(100);
+        Sleep(50);
         #else
-        usleep(100000);
+        usleep(50000);
         #endif
     }
 }
