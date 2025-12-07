@@ -5,7 +5,11 @@
 
 // Clear screen cross-platform
 void clearScreen() {
-    printf("\033[2J\033[1;1H");
+    #ifdef _WIN32
+    system("cls");  // Windows: dùng cls
+#else
+    printf("\033[2J\033[1;1H");  // macOS/Linux: dùng ANSI codes
+#endif
 }
 
 // Legacy functions (giữ để tương thích với code cũ)

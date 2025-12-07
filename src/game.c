@@ -148,7 +148,6 @@ void startGame() {
     
     // Khoi tao so luong enemy theo do kho
     for (int i = 0; i < numEnemies; i++) {
-        resetEnemyStatics();  // Reset static variables
         initEnemy(&enemies[i], spawnPositions[i][0], spawnPositions[i][1]);
     }
     
