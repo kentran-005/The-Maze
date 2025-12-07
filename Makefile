@@ -22,9 +22,9 @@ clean:
 
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
-	@$(TARGET)
+	$(TARGET)
 else
-	@./$(TARGET)
+	./$(TARGET)
 endif
 
 
