@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ENEMY_SPEED 3
+#define ENEMY_SPEED 2
 #define CHASE_RANGE 8
 #define DIR_CHANGE 8
 #define RANDOM_CHANCE 30
