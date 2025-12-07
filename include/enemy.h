@@ -1,10 +1,18 @@
 #ifndef ENEMY_H
 #define ENEMY_H
 
+#define HISTORY_SIZE 5
+
 typedef struct {
-    int x;
-    int y;
+    int x, y;
     int alive;
+    
+    int moveCounter;
+    int currentDir;
+    int dirCounter;
+    int historyX[HISTORY_SIZE];
+    int historyY[HISTORY_SIZE];
+    int historyIndex;
 } Enemy;
 
 void initEnemy(Enemy *e, int x, int y);

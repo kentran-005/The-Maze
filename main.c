@@ -1,24 +1,53 @@
 #include <stdio.h>
 #include "game.h"
 #include "audio.h"
+#include <stdlib.h>
 
 int main() {
     char choice;
     
     do {
+        // Xóa màn hình trước khi bắt đầu
+        #ifdef _WIN32
+        system("cls");
+        #else
+        system("clear");
+        #endif
+        
         printf("Starting game...\n");
         playBackgroundMusic();
         
+        // Bắt đầu game (có menu chọn độ khó bên trong)
         startGame();
         
         stopBackgroundMusic();
         
-        printf("\nChoi lai? (y/n): ");
+        // Hỏi chơi lại
+        printf("\n╔═══════════════════════════════════════╗\n");
+        printf("║  Ban co muon choi lai khong?         ║\n");
+        printf("╚═══════════════════════════════════════╝\n");
+        printf("Nhap (y/n): ");
         scanf(" %c", &choice);
-        getchar(); // Clear buffer
+        
+        // Clear input buffer
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
         
     } while (choice == 'y' || choice == 'Y');
     
-    printf("\nCam on da choi!\n");
+    // Kết thúc game
+    #ifdef _WIN32
+    system("cls");
+    #else
+    system("clear");
+    #endif
+    
+    printf("\n");
+    printf("╔═══════════════════════════════════════╗\n");
+    printf("║     CAM ON DA CHOI GAME!              ║\n");
+    printf("║     THANKS FOR PLAYING!               ║\n");
+    printf("╚═══════════════════════════════════════╝\n");
+    printf("\n");
+    
     return 0;
 }
