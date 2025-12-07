@@ -3,14 +3,34 @@
 #include "render.h"
 #include "map.h"
 
-// Clear screen cross-platform
-void clearScreen() {
-    #ifdef _WIN32
-    system("cls");  // Windows: dùng cls
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+void gotoXY(int x, int y) {
+#ifdef _WIN32
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD pos = {x, y};
+    SetConsoleCursorPosition(h, pos);
 #else
-    printf("\033[2J\033[1;1H");  // macOS/Linux: dùng ANSI codes
+    printf("\033[%d;%dH", y + 1, x + 1);
 #endif
 }
+
+void clearScreen() {
+#ifdef _WIN32
+    gotoXY(0, 0);   // KHÔNG dùng system("cls") nữa
+#else
+    printf("\033[2J\033[1;1H");
+#endif
+}
+
+
+void drawPlayer(int x, int y) {}
+void drawEnemy(int x, int y) {}
+
+// Clear screen cross-platform
+
 
 // Legacy functions (giữ để tương thích với code cũ)
 void drawPlayer(int x, int y) {
