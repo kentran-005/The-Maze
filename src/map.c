@@ -19,7 +19,7 @@ char gameMap[MAP_HEIGHT][MAP_WIDTH] = {
     "# #     # #    # # #",
     "# # ### # #### # # #",
     "# #   # #      #   #",
-    "# ### # ######## #E#",
+    "# ### # ######## ##E",
     "#   #            # #",
     "### ############## #",
     "####################"
@@ -34,7 +34,7 @@ int enemyStartX = 15;
 int enemyStartY = 8;
 
 // Vị trí exit
-int exitX = 19;
+int exitX = 18;
 int exitY = 16;
 
 // Kiểm tra tường

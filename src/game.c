@@ -275,9 +275,9 @@ void startGame() {
 
         // Delay cho game muot
         #ifdef _WIN32
-        Sleep(100);
+        Sleep(200);
         #else
-        usleep(100000);
+        usleep(200000);
         #endif
     }
 }
