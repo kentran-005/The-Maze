@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "render.h"
 
 // Giả lập _kbhit() cho macOS/Linux
 int _kbhit(void) {
@@ -51,35 +52,40 @@ int _getch(void) {
 }
 #endif
 
-void handleInput(char key, int *x, int *y, int *running) {
+void handleInput(char key, int *x, int *y, int *running, int *playerFacing) {
     int newX = *x;
     int newY = *y;
+    int moved = 0;
 
     switch (key) {
-        case 'w':
-        case 'W': newY--; break;
-        case 's':
-        case 'S': newY++; break;
-        case 'a':
-        case 'A': newX--; break;
-        case 'd':
-        case 'D': newX++; break;
-        case 'q':
-        case 'Q':
-            *running = 0;
-            return;
+        case 'w': case 'W': newY--; *playerFacing = 0; break;  // lên
+        case 's': case 'S': newY++; *playerFacing = 2; break;  // xuống
+        case 'a': case 'A': newX--; *playerFacing = 3; break;  // trái
+        case 'd': case 'D': newX++; *playerFacing = 1; break;  // phải
+        case 'q': case 'Q': *running = 0; break;
+        return;
+        default: return;
     }
+    
     // Kiểm tra va chạm tường
     if (!isWall(newX, newY) || isExit(newX, newY)) {
         *x = newX;
         *y = newY;
+        moved = 1;
     }
 
 
     // Kiểm tra thoát mê cung
     if (isExit(*x, *y)) {
         *running = 0;
+        clearScreen();
         printf("\n=== YOU ESCAPED! ===\n");
         printf("BAN DA THOAT KHOI ME CUNG!\n");
+
+#ifdef _WIN32
+        Sleep(5000);
+#else
+        usleep(5000000);
+#endif
     }
 }

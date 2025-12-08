@@ -5,7 +5,7 @@
 
 void clearScreen();
 void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive);
-void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int numEnemies); 
+void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int numEnemies, int playerFacing); 
 void drawPlayer(int playerX, int playerY);
 void drawEnemy(int enemyX, int enemyY);  
 

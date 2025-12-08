@@ -8,6 +8,6 @@
     int _getch();
 #endif
 
-void handleInput(char key, int *x, int *y, int *running);
+void handleInput(char key, int *x, int *y, int *running, int *playerFacing);
 
 #endif

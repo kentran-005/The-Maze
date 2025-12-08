@@ -64,7 +64,7 @@ static int getch_posix(void)
 
 #define MAX_OXY 100
 #define TIME_LIMIT 240
-#define MAX_ENEMIES 4
+#define MAX_ENEMIES 24
 
 void drawOxyBar(int oxy)
 {
@@ -121,6 +121,8 @@ int selectDifficulty()
     }
 }
 
+int playerFacing = 1; // start facing right
+
 void startGame()
 {
     int difficulty = selectDifficulty();
@@ -141,30 +143,47 @@ void startGame()
         numEnemies = 1;
     }
     time_t startTime = time(NULL);
-    int elapsed = 0;
+    int elapsed = 0; // thời gian đã trôi qua
     int prevElapsed = -1;
-    int oxy = MAX_OXY;
-    int running = 1;
+    int oxy = MAX_OXY; // Oxy ban đầu
+    int running = 1; 
+
+    int totalWaves = 3; // Số wave tổng cộng.
+    int enemiesPerWave = (difficulty == 1 ? 2 : (difficulty == 2 ? 4 : 8)); // Số quái vật mỗi wave.
+    int currentWave = 0;
+    int activeEnemies = 0;   
+    time_t lastWaveTime = time(NULL);
+    int waveDelay = 5; // time spawn giữa các wave (giây)
 
     int x = playerStartX;
     int y = playerStartY;
+
 
     srand((unsigned int)time(NULL));
 
     Enemy enemies[MAX_ENEMIES];
 
     int spawnPositions[4][2] = {
-        {15, 8}, // Vị trí cũ của enemy trong map.c → an toàn
-        {8, 14}, // Góc dưới trái
-        {12, 4}, // Trên giữa
-        {17, 12} // Gần exit → tăng độ khó
-    };
+    {3, 3},
+    {15, 3},
+    {3, 15},
+    {15, 15}
+};
 
     for (int i = 0; i < numEnemies; i++)
     {
         initEnemy(&enemies[i], spawnPositions[i][0], spawnPositions[i][1]);
     }
 
+    // Bắt đầu wave đầu tiên
+    currentWave = 1;
+    for (int i = 0; i < enemiesPerWave; i++)
+    {
+        initEnemy(&enemies[i], spawnPositions[i % 4][0], spawnPositions[i % 4][1]);
+        activeEnemies++;
+    }
+    
+    
     int needsRedraw = 1;
     int enemyMoved = 0;
 
@@ -248,6 +267,35 @@ void startGame()
             break;
         }
 
+        
+        // === QUẢN LÝ WAVE ENEMY MỚI ===
+        int aliveCount = 0;
+        for (int i = 0; i < MAX_ENEMIES; i++) {
+            if (enemies[i].alive) aliveCount++;
+        }
+        if (aliveCount == 0 && currentWave < totalWaves)
+        {
+            if ((int)(time(NULL) - lastWaveTime) >= waveDelay)
+            {
+                currentWave++;
+                int spawned = 0;
+                for (int i = 0; i < MAX_ENEMIES && spawned < enemiesPerWave; i++)
+                {
+                    if (!enemies[i].alive)
+                    {
+                        initEnemy(&enemies[i], 
+                            spawnPositions[spawned % 4][0],
+                             spawnPositions[spawned % 4][1]);
+                             spawned++;
+                    }
+                }
+                activeEnemies += enemiesPerWave;
+                lastWaveTime = time(NULL);
+                needsRedraw = 1; // Vẽ lại khi có spawn wave mới
+            }       
+        }
+        
+
         // === CẬP NHẬT ENEMY ===
         enemyMoved = 0;
         for (int i = 0; i < numEnemies; i++)
@@ -263,7 +311,7 @@ void startGame()
                     enemyMoved = 1;
                 }
 
-                checkEnemyCollision(&enemies[i], x, y, &running);
+                checkEnemyCollision(&enemies[i], x, y, playerFacing, &running);
                 if (!running)
                 {
                     clearScreen();
@@ -292,16 +340,21 @@ void startGame()
             {
                 char key = _getch();
                 int oldX = x, oldY = y;
-                handleInput(key, &x, &y, &running);
-                if (x != oldX || y != oldY)
-                    needsRedraw = 1;
+                handleInput(key, &x, &y, &running, &playerFacing);
+                // Cập nhật hướng player
+                if (key == 'a' || key == 'A') playerFacing = 0;
+                if (key == 'd' || key == 'D') playerFacing = 1;
+
+                if (x != oldX || y != oldY) needsRedraw = 1;
+
                 if (isExit(x, y))
-                { /* thắng */
+                {
                     running = 0;
                 }
             }
             needsRedraw = 1;
         }
+
         if (elapsed > prevElapsed)
         {
             prevElapsed = elapsed;
@@ -322,7 +375,7 @@ void startGame()
             drawOxyBar(oxy);
             printf("\n");
 
-            drawMapWithMultipleEnemies(x, y, enemies, numEnemies);
+            drawMapWithMultipleEnemies(x, y, enemies, MAX_ENEMIES, playerFacing);
 
             printf("\n╔═══════════════════════════════════════════════════╗\n");
             printf("║   W/A/S/D = Di chuyen     Q = Thoat game        ║\n");
@@ -339,7 +392,7 @@ void startGame()
             int oldX = x;
             int oldY = y;
 
-            handleInput(key, &x, &y, &running);
+            handleInput(key, &x, &y, &running, &playerFacing);
 
             if (x != oldX || y != oldY)
             {
@@ -371,13 +424,14 @@ void startGame()
 #endif
                 running = 0;
             }
+            needsRedraw = 1; // Vẽ lại sau khi xử lý input
         }
 
 // Delay nhỏ để game mượt, không ăn CPU
 #ifdef _WIN32
         Sleep(200);
 #else
-        usleep(2000000);
+        usleep(200000);
 #endif
     }
 }

@@ -19,6 +19,8 @@ void initEnemy(Enemy *e, int x, int y) {
     e->dirCounter = 0;
     e->historyIndex = 0;
     
+    e->facing = rand() % 2; // random left/right
+
     for (int i = 0; i < HISTORY_SIZE; i++) {
         e->historyX[i] = -1;
         e->historyY[i] = -1;
@@ -69,6 +71,12 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
         {-1, 0}   // 3: Trái
     };
     
+    if (e->currentDir == 0) e->facing = 0; // up
+    else if (e->currentDir == 1) e->facing = 1; // right
+    else if (e->currentDir == 2) e->facing = 1; // down
+    else if (e->currentDir == 3) e->facing = 0; // left
+
+
     // MODE 1: CHASE - Player ở gần
     if (dist <= CHASE_RANGE) {
         int useRandom = (rand() % 100) < RANDOM_CHANCE;
@@ -160,9 +168,13 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
     }
 }
 
-void checkEnemyCollision(Enemy *e, int playerX, int playerY, int *running) {
-    if (e->alive && e->x == playerX && e->y == playerY) {
-        e->alive = 0;
-        *running = 0;
-    }
+void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, int *running) {
+    if (!e->alive || e->x != playerX || e->y != playerY) return;
+    int opposite = (playerFacing + 2) % 4; // Hướng đối diện
+    if (e->facing == opposite)
+    {
+        e->alive = 0; // Enemy bị hạ
+    } else {
+        *running = 0; // Player bị bắt  
+    }  
 }

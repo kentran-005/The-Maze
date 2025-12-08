@@ -4,5 +4,7 @@
 void startGame(void);
 int selectDifficulty(void); 
 
+extern int playerFacing; // 0 = left, 1 = right
+
 #endif
 
