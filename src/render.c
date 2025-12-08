@@ -3,7 +3,6 @@
 #include "render.h"
 #include "map.h"
 
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -29,10 +28,15 @@ void clearScreen() {
 #endif
 }
 
-void drawPlayer(int x, int y) {}
-void drawEnemy(int x, int y) {}
+void drawPlayer(int x, int y) {
+    // Legacy - không dùng
+}
 
-// Vẽ map với player và enemy (1 enemy - chế độ cũ)
+void drawEnemy(int x, int y) {
+    // Legacy - không dùng
+}
+
+// Vẽ map với 1 enemy (legacy)
 void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
     printf("\n");
     
@@ -41,16 +45,16 @@ void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
         
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (x == playerX && y == playerY) {
-                printf("\033[1;32m@\033[0m ");
+                printf("\033[1;36m😎\033[0m");
             }
             else if (enemyAlive && x == enemyX && y == enemyY) {
-                printf("\033[1;31mM\033[0m ");
+                printf("\033[1;31m👻\033[0m");
             }
             else if (x == exitX && y == exitY) {
-                printf("\033[1;33mE\033[0m ");
+                printf("\033[1;33m🏆\033[0m");
             }
             else if (gameMap[y][x] == '#') {
-                printf("\033[1;37m#\033[0m ");
+                printf("\033[1;37m##\033[0m");
             }
             else {
                 printf("  ");
@@ -60,45 +64,59 @@ void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
     }
     
     printf("\n");
-    printf("  \033[1;32m@\033[0m = Ban (Player)  ");
-    printf("\033[1;31mM\033[0m = Quai vat (Monster)  ");
-    printf("\033[1;33mE\033[0m = Loi thoat (Exit)\n");
+    printf("  \033[1;36m😎\033[0m = Ban   ");
+    printf("\033[1;31m👻\033[0m = Quai   ");
+    printf("\033[1;33m🏆\033[0m = Exit\n");
 }
 
-void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int numEnemies, int playerFacing)
-{
-    const char* playerIcons[4] = {"\033[1;32m^\033[0m", "\033[1;32m>\033[0m", "\033[1;32mv\033[0m", "\033[1;32m<\033[0m"};
-    const char* enemyIcons[4]  = {"\033[1;31mM^\033[0m", "\033[1;31mM>\033[0m", "\033[1;31mMv\033[0m", "\033[1;31mM<\033[0m"};
-
+// Vẽ map với nhiều enemies
+void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int numEnemies, int playerFacing) {
     printf("\n");
     
     for (int y = 0; y < MAP_HEIGHT; y++) {
+        printf("  ");  // Indent
+        
         for (int x = 0; x < MAP_WIDTH; x++) {
-
-            // === VẼ PLAYER THEO HƯỚNG ===
+            // === VẼ PLAYER ===
             if (x == playerX && y == playerY) {
-                printf("\033[1;32m%s\033[0m ", playerIcons[playerFacing]);
+                // playerFacing: 0 = trái (<), 1 = phải (>)
+                if (playerFacing == 0) {
+                    printf("\033[1;36m<\033[0m ");  // Quay trái
+                } else {
+                    printf("\033[1;36m>\033[0m ");  // Quay phải
+                }
                 continue;
             }
 
-            // === VẼ ENEMY THEO HƯỚNG ===
+            // === VẼ ENEMIES ===
             int isEnemy = 0;
             for (int i = 0; i < numEnemies; i++) {
                 if (enemies[i].alive && enemies[i].x == x && enemies[i].y == y) {
-                    printf("\033[1;31m%s\033[0m ", enemyIcons[enemies[i].facing]);
+                    // Enemy facing: 0=lên, 1=phải, 2=xuống, 3=trái
+                    const char* icon = "M";
+                    switch(enemies[i].facing) {
+                        case 0: icon = "^"; break;  // Lên
+                        case 1: icon = ">"; break;  // Phải
+                        case 2: icon = "v"; break;  // Xuống
+                        case 3: icon = "<"; break;  // Trái
+                        default: icon = "M";
+                    }
+                    printf("\033[1;31m%s\033[0m ", icon);
                     isEnemy = 1;
                     break;
                 }
             }
             if (isEnemy) continue;
 
-            // === VẼ EXIT & TƯỜNG ===
+            // === VẼ EXIT ===
             if (x == exitX && y == exitY) {
                 printf("\033[1;33mE\033[0m ");
             }
+            // === VẼ TƯỜNG ===
             else if (gameMap[y][x] == '#') {
-                printf("\033[1;37m#\033[0m ");
+                printf("\033[1;90m█\033[0m ");  // Màu xám đậm
             }
+            // === KHOẢNG TRỐNG ===
             else {
                 printf("  ");
             }
@@ -107,10 +125,9 @@ void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int nu
     }
 
     printf("\n");
-    printf(" \033[1;32m^ > v <\033[0m = Ban (Player)    ");
-    printf("\033[1;31mM^ M> Mv M<\033[0m = Quai vat    ");
-    printf("\033[1;33mE\033[0m = Loi thoat\n");
-    printf(" Mat doi mat moi giet duoc quai!\n");
+    printf("  \033[1;36m< >\033[0m = Ban (Player)   ");
+    printf("\033[1;31m^ > v <\033[0m = Quai vat   ");
+    printf("\033[1;33mE\033[0m = Exit\n");
 
     fflush(stdout);
 }

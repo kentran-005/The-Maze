@@ -19,7 +19,7 @@ void initEnemy(Enemy *e, int x, int y) {
     e->dirCounter = 0;
     e->historyIndex = 0;
     
-    e->facing = rand() % 2; // random left/right
+    e->facing = e->currentDir;  // facing = currentDir (0-3)
 
     for (int i = 0; i < HISTORY_SIZE; i++) {
         e->historyX[i] = -1;
@@ -64,24 +64,20 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
 
     int dist = getDistance(e->x, e->y, playerX, playerY);
     
+    // 4 hướng: 0=Lên, 1=Phải, 2=Xuống, 3=Trái
     int directions[4][2] = {
         {0, -1},  // 0: Lên
         {1, 0},   // 1: Phải
         {0, 1},   // 2: Xuống
         {-1, 0}   // 3: Trái
     };
-    
-    if (e->currentDir == 0) e->facing = 0; // up
-    else if (e->currentDir == 1) e->facing = 1; // right
-    else if (e->currentDir == 2) e->facing = 1; // down
-    else if (e->currentDir == 3) e->facing = 0; // left
-
 
     // MODE 1: CHASE - Player ở gần
     if (dist <= CHASE_RANGE) {
         int useRandom = (rand() % 100) < RANDOM_CHANCE;
         
         if (useRandom) {
+            // Di chuyển random
             int validDirs[4];
             int validCount = 0;
             
@@ -100,9 +96,11 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 e->x += directions[randomDir][0];
                 e->y += directions[randomDir][1];
                 e->currentDir = randomDir;
+                e->facing = randomDir;  // Cập nhật facing
                 e->dirCounter = 0;
             }
         } else {
+            // Đuổi player
             int bestDir = -1;
             int bestDist = 999;
             
@@ -124,6 +122,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
                 e->x += directions[bestDir][0];
                 e->y += directions[bestDir][1];
                 e->currentDir = bestDir;
+                e->facing = bestDir;  // Cập nhật facing
                 e->dirCounter = 0;
             }
         }
@@ -139,6 +138,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
         int suddenChange = (rand() % 100) < (RANDOM_CHANCE / 2);
         
         if (!isValidMove(newX, newY) || e->dirCounter >= DIR_CHANGE || willBeStuck || suddenChange) {
+            // Đổi hướng
             int validDirs[4];
             int validCount = 0;
             
@@ -154,6 +154,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
             if (validCount > 0) {
                 int randomDir = validDirs[rand() % validCount];
                 e->currentDir = randomDir;
+                e->facing = randomDir;  // Cập nhật facing
                 addToHistory(e, e->x, e->y);
                 e->x += directions[randomDir][0];
                 e->y += directions[randomDir][1];
@@ -161,20 +162,34 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
             }
         }
         else {
+            // Tiếp tục đi thẳng
             addToHistory(e, e->x, e->y);
             e->x = newX;
             e->y = newY;
+            e->facing = e->currentDir;  // Cập nhật facing
         }
     }
 }
 
 void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, int *running) {
-    if (!e->alive || e->x != playerX || e->y != playerY) return;
-    int opposite = (playerFacing + 2) % 4; // Hướng đối diện
-    if (e->facing == opposite)
-    {
-        e->alive = 0; // Enemy bị hạ
+    if (!e->alive) return;
+    if (e->x != playerX || e->y != playerY) return;
+    
+    // Chuyển đổi playerFacing (0=trái, 1=phải) sang 4 hướng
+    // playerFacing = 0 (trái) = direction 3
+    // playerFacing = 1 (phải) = direction 1
+    int playerDir = (playerFacing == 0) ? 3 : 1;
+    
+    // Kiểm tra đối mặt nhau
+    // Ví dụ: Player hướng phải (1) vs Enemy hướng trái (3)
+    int opposite = (playerDir + 2) % 4;
+    
+    if (e->facing == opposite) {
+        // Đối mặt nhau → Player giết enemy
+        e->alive = 0;
+        printf("\033[1;32m[!] Ban da tieu diet 1 quai vat!\033[0m\n");
     } else {
-        *running = 0; // Player bị bắt  
-    }  
+        // Không đối mặt → Enemy bắt player
+        *running = 0;
+    }
 }

@@ -8,14 +8,12 @@
 #include <termios.h>
 #include <fcntl.h>
 
-static int kbhit_posix(void)
-{
+static int kbhit_posix(void) {
     struct termios oldt, newt;
     int ch;
     int oldf;
 
-    if (tcgetattr(STDIN_FILENO, &oldt) == -1)
-        return 0;
+    if (tcgetattr(STDIN_FILENO, &oldt) == -1) return 0;
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
@@ -23,8 +21,7 @@ static int kbhit_posix(void)
     fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
     ch = getchar();
-    if (ch != EOF)
-    {
+    if (ch != EOF) {
         ungetc(ch, stdin);
         tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
         fcntl(STDIN_FILENO, F_SETFL, oldf);
@@ -36,12 +33,10 @@ static int kbhit_posix(void)
     return 0;
 }
 
-static int getch_posix(void)
-{
+static int getch_posix(void) {
     struct termios oldt, newt;
     int ch;
-    if (tcgetattr(STDIN_FILENO, &oldt) == -1)
-        return EOF;
+    if (tcgetattr(STDIN_FILENO, &oldt) == -1) return EOF;
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
@@ -63,37 +58,31 @@ static int getch_posix(void)
 #include "map.h"
 
 #define MAX_OXY 100
-#define TIME_LIMIT 240
-#define MAX_ENEMIES 24
+#define TIME_LIMIT 180
+#define MAX_ENEMIES 4
 
-void drawOxyBar(int oxy)
-{
+int playerFacing = 1; // 0=left, 1=right
+
+void drawOxyBar(int oxy) {
     int bars = 20;
-    int filled = oxy * bars / 100;
+    int filled = (oxy * bars) / 100;
 
-    if (filled < 0)
-        filled = 0;
-    if (filled > bars)
-        filled = bars;
+    if (filled < 0) filled = 0;
+    if (filled > bars) filled = bars;
 
     printf("OXY: [");
-    for (int i = 0; i < bars; i++)
-    {
-        if (i < filled)
-            printf("#");
-        else
-            printf("-");
+    for (int i = 0; i < bars; i++) {
+        if (i < filled) printf("#");
+        else printf("-");
     }
     printf("] %d%%\n", oxy);
 
-    if (oxy > 0 && oxy <= 20)
-    {
-        printf("\033[1;31mCANH BAO: SAP HET OXY!\n\033[0m");
+    if (oxy > 0 && oxy <= 20) {
+        printf("\033[1;31mCANH BAO: SAP HET OXY!\033[0m\n");
     }
 }
 
-int selectDifficulty()
-{
+int selectDifficulty() {
     clearScreen();
     printf("\n");
     printf("╔═══════════════════════════════════════════╗\n");
@@ -108,330 +97,185 @@ int selectDifficulty()
     printf("║  Nhap lua chon (1-3): ");
 
     char choice;
-    while (1)
-    {
+    while (1) {
         choice = getchar();
-        if (choice == '1' || choice == '2' || choice == '3')
-        {
+        if (choice == '1' || choice == '2' || choice == '3') {
             int c;
-            while ((c = getchar()) != '\n' && c != EOF)
-                ;
+            while ((c = getchar()) != '\n' && c != EOF);
             return choice - '0';
         }
     }
 }
 
-int playerFacing = 1; // start facing right
+void startGame() {
+    // Enable UTF-8 on Windows
+    #ifdef _WIN32
+    SetConsoleOutputCP(65001);
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    SetConsoleMode(hOut, dwMode);
+    #endif
 
-void startGame()
-{
     int difficulty = selectDifficulty();
     int numEnemies = 0;
 
-    switch (difficulty)
-    {
-    case 1:
-        numEnemies = 1;
-        break;
-    case 2:
-        numEnemies = 2;
-        break;
-    case 3:
-        numEnemies = 4;
-        break;
-    default:
-        numEnemies = 1;
+    switch(difficulty) {
+        case 1: numEnemies = 1; break;
+        case 2: numEnemies = 2; break;
+        case 3: numEnemies = 4; break;
+        default: numEnemies = 1;
     }
-    time_t startTime = time(NULL);
-    int elapsed = 0; // thời gian đã trôi qua
-    int prevElapsed = -1;
-    int oxy = MAX_OXY; // Oxy ban đầu
-    int running = 1; 
 
-    int totalWaves = 3; // Số wave tổng cộng.
-    int enemiesPerWave = (difficulty == 1 ? 2 : (difficulty == 2 ? 4 : 8)); // Số quái vật mỗi wave.
-    int currentWave = 0;
-    int activeEnemies = 0;   
-    time_t lastWaveTime = time(NULL);
-    int waveDelay = 5; // time spawn giữa các wave (giây)
-
+    int running = 1;
     int x = playerStartX;
     int y = playerStartY;
-
-
+    playerFacing = 1; // Start facing right
+    
+    int oxy = MAX_OXY;
+    time_t startTime = time(NULL);
+    
     srand((unsigned int)time(NULL));
 
+    // Khoi tao mang enemies
     Enemy enemies[MAX_ENEMIES];
+    for (int i = 0; i < MAX_ENEMIES; i++) {
+        enemies[i].alive = 0; // Tat ca bat dau chet
+    }
 
+    // Vi tri spawn
     int spawnPositions[4][2] = {
-    {3, 3},
-    {15, 3},
-    {3, 15},
-    {15, 15}
-};
+        {3, 3},
+        {16, 3},
+        {3, 16},
+        {16, 16}
+    };
 
-    for (int i = 0; i < numEnemies; i++)
-    {
+    // Spawn enemies theo do kho
+    for (int i = 0; i < numEnemies; i++) {
         initEnemy(&enemies[i], spawnPositions[i][0], spawnPositions[i][1]);
     }
 
-    // Bắt đầu wave đầu tiên
-    currentWave = 1;
-    for (int i = 0; i < enemiesPerWave; i++)
-    {
-        initEnemy(&enemies[i], spawnPositions[i % 4][0], spawnPositions[i % 4][1]);
-        activeEnemies++;
-    }
-    
-    
-    int needsRedraw = 1;
-    int enemyMoved = 0;
-
+    // Man hinh bat dau
     clearScreen();
     printf("\n╔═══════════════════════════════════════════╗\n");
-    if (difficulty == 1)
-    {
+    if (difficulty == 1) {
         printf("║     CHE DO: DE (1 QUAI VAT)              ║\n");
-    }
-    else if (difficulty == 2)
-    {
+    } else if (difficulty == 2) {
         printf("║     CHE DO: TRUNG BINH (2 QUAI VAT)      ║\n");
-    }
-    else
-    {
+    } else {
         printf("║     CHE DO: KHO (4 QUAI VAT)             ║\n");
     }
     printf("╚═══════════════════════════════════════════╝\n");
     printf("\nNhan phim bat ky de bat dau...\n");
     _getch();
-    clearScreen();
 
-#ifdef _WIN32
-    {
-        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD dwMode = 0;
-        GetConsoleMode(hOut, &dwMode);
-        dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
-        SetConsoleMode(hOut, dwMode);
-        SetConsoleOutputCP(65001);
-    }
-#endif
-    elapsed = (int)(time(NULL) - startTime);
+    // GAME LOOP
+    while (running) {
+        int elapsed = (int)(time(NULL) - startTime);
 
-    while (running)
-    {
-        // Cập nhật thời gian thực (wall time)
+        // Tinh OXY
+        oxy = MAX_OXY - (elapsed * MAX_OXY / TIME_LIMIT);
+        if (oxy < 0) oxy = 0;
 
-        // Giảm oxy mỗi khi qua 1 giây mới
-        if (elapsed > prevElapsed)
-        {
-            prevElapsed = elapsed;
-            oxy--;
-            needsRedraw = 1;
-        }
-
-        // Hết oxy → Game Over
-        if (oxy <= 0)
-        {
-            oxy = 0;
+        // Het OXY
+        if (oxy <= 0) {
             clearScreen();
             printf("\n╔═══════════════════════════════════════╗\n");
             printf("║        HET OXY - GAME OVER            ║\n");
             printf("╚═══════════════════════════════════════╝\n");
             printf("\nBAN DA HET OXY TRONG ME CUNG!\n");
-            printf("Thoi gian song sot: %d giay\n\n", elapsed);
+            printf("Thoi gian song: %d giay\n\n", elapsed);
 
-#ifdef _WIN32
-            Sleep(4000);
-#else
-            usleep(4000000);
-#endif
+            #ifdef _WIN32
+            Sleep(3000);
+            #else
+            usleep(3000000);
+            #endif
             break;
         }
 
-        // Hết thời gian giới hạn → Game Over
-        if (elapsed >= TIME_LIMIT)
-        {
-            clearScreen();
-            printf("\n╔═══════════════════════════════════════╗\n");
-            printf("║       HET THOI GIAN - GAME OVER       ║\n");
-            printf("╚═══════════════════════════════════════╝\n");
-            printf("\nBAN DA HET THOI GIAN QUY DINH!\n");
-            printf("Oxy con lai: %d%%\n\n", oxy);
-
-#ifdef _WIN32
-            Sleep(4000);
-#else
-            usleep(4000000);
-#endif
-            break;
-        }
-
-        
-        // === QUẢN LÝ WAVE ENEMY MỚI ===
-        int aliveCount = 0;
-        for (int i = 0; i < MAX_ENEMIES; i++) {
-            if (enemies[i].alive) aliveCount++;
-        }
-        if (aliveCount == 0 && currentWave < totalWaves)
-        {
-            if ((int)(time(NULL) - lastWaveTime) >= waveDelay)
-            {
-                currentWave++;
-                int spawned = 0;
-                for (int i = 0; i < MAX_ENEMIES && spawned < enemiesPerWave; i++)
-                {
-                    if (!enemies[i].alive)
-                    {
-                        initEnemy(&enemies[i], 
-                            spawnPositions[spawned % 4][0],
-                             spawnPositions[spawned % 4][1]);
-                             spawned++;
-                    }
-                }
-                activeEnemies += enemiesPerWave;
-                lastWaveTime = time(NULL);
-                needsRedraw = 1; // Vẽ lại khi có spawn wave mới
-            }       
-        }
-        
-
-        // === CẬP NHẬT ENEMY ===
-        enemyMoved = 0;
-        for (int i = 0; i < numEnemies; i++)
-        {
-            if (enemies[i].alive)
-            {
-                int oldX = enemies[i].x;
-                int oldY = enemies[i].y;
+        // Cap nhat TAT CA enemies
+        for (int i = 0; i < numEnemies; i++) {
+            if (enemies[i].alive) {
                 updateEnemy(&enemies[i], x, y);
-
-                if (enemies[i].x != oldX || enemies[i].y != oldY)
-                {
-                    enemyMoved = 1;
-                }
-
                 checkEnemyCollision(&enemies[i], x, y, playerFacing, &running);
-                if (!running)
-                {
+
+                if (!running) {
                     clearScreen();
                     printf("\n╔═══════════════════════════════════════╗\n");
-                    printf("║     QUAI VAT DA BAT BAN!              ║\n");
+                    printf("║     QUAI VAT - GAME OVER              ║\n");
                     printf("╚═══════════════════════════════════════╝\n");
                     printf("\nBAN DA BI QUAI VAT SO %d BAT!\n", i + 1);
-                    printf("Thoi gian song sot: %d giay\n", elapsed);
-                    printf("Oxy con lai: %d%%\n\n", oxy);
+                    printf("Thoi gian song: %d giay\n\n", elapsed);
 
-#ifdef _WIN32
-                    Sleep(4000);
-#else
-                    usleep(4000000);
-#endif
+                    #ifdef _WIN32
+                    Sleep(3000);
+                    #else
+                    usleep(3000000);
+                    #endif
                     break;
                 }
-                if (!running)
-                    break;
             }
         }
 
-        if (enemyMoved || _kbhit())
-        {
-            if (_kbhit())
-            {
-                char key = _getch();
-                int oldX = x, oldY = y;
-                handleInput(key, &x, &y, &running, &playerFacing);
-                // Cập nhật hướng player
-                if (key == 'a' || key == 'A') playerFacing = 0;
-                if (key == 'd' || key == 'D') playerFacing = 1;
+        if (!running) break;
 
-                if (x != oldX || y != oldY) needsRedraw = 1;
+        // RENDER - CHI 1 LAN DUY NHAT
+        clearScreen();
+        printf("╔═══════════════════════════════════════╗\n");
+        printf("║      ESCAPE THE MAZE GAME             ║\n");
+        printf("╚═══════════════════════════════════════╝\n");
+        printf("Thoi gian: %d/%d giay | Quai vat: %d\n\n",
+               elapsed, TIME_LIMIT, numEnemies);
 
-                if (isExit(x, y))
-                {
-                    running = 0;
-                }
-            }
-            needsRedraw = 1;
-        }
+        drawOxyBar(oxy);
+        printf("\n");
 
-        if (elapsed > prevElapsed)
-        {
-            prevElapsed = elapsed;
-            oxy--;
-            needsRedraw = 1;
-        }
+        drawMapWithMultipleEnemies(x, y, enemies, numEnemies, playerFacing);
 
-        // === VẼ LẠI MÀN HÌNH ===
-        if (needsRedraw)
-        {
-            clearScreen();
-            printf("╔═══════════════════════════════════════════════════════╗\n");
-            printf("║         ESCAPE THE MAZE - SURVIVE!                    ║\n");
-            printf("╚═══════════════════════════════════════════════════════╝\n");
-            printf("Thoi gian: %3d/%d giay  |  Quai vat: %d  |  Oxy: %d%%\n\n",
-                   elapsed, TIME_LIMIT, numEnemies, oxy);
+        printf("\n╔═══════════════════════════════════════╗\n");
+        printf("║ W/A/S/D: Di chuyen | Q: Thoat        ║\n");
+        printf("║ Muc tieu: Tim loi thoat (E)!         ║\n");
+        printf("╚═══════════════════════════════════════╝\n");
 
-            drawOxyBar(oxy);
-            printf("\n");
+        fflush(stdout); // Dam bao output duoc in ra ngay
 
-            drawMapWithMultipleEnemies(x, y, enemies, MAX_ENEMIES, playerFacing);
-
-            printf("\n╔═══════════════════════════════════════════════════╗\n");
-            printf("║   W/A/S/D = Di chuyen     Q = Thoat game        ║\n");
-            printf("║         Tim chu 'E' de thoat khoi me cung!      ║\n");
-            printf("╚═══════════════════════════════════════════════════╝\n");
-
-            needsRedraw = 0; // Quan trọng: reset cờ sau khi vẽ
-            fflush(stdout);
-        }
-        // === XỬ LÝ INPUT ===
-        if (_kbhit())
-        {
+        // XU LY INPUT
+        if (_kbhit()) {
             char key = _getch();
-            int oldX = x;
-            int oldY = y;
-
             handleInput(key, &x, &y, &running, &playerFacing);
 
-            if (x != oldX || y != oldY)
-            {
-                needsRedraw = 1; // Player di chuyển → vẽ lại
-            }
-
-            // Kiểm tra thắng
-            if (isExit(x, y))
-            {
+            // Kiem tra WIN
+            if (isExit(x, y)) {
                 clearScreen();
                 printf("\n╔═══════════════════════════════════════╗\n");
-                printf("║           BAN DA THANG!               ║\n");
-                printf("╚═══════════════════════════════════════════════════════╝\n");
-                printf("\nCHUC MUNG! BAN DA THOAT KHOI ME CUNG!\n");
+                printf("║       CHIEN THANG! 🎉                ║\n");
+                printf("╚═══════════════════════════════════════╝\n");
+                printf("\nBan da thoat khoi me cung!\n");
                 printf("Do kho: ");
-                if (difficulty == 1)
-                    printf("DE\n");
-                else if (difficulty == 2)
-                    printf("TRUNG BINH\n");
-                else
-                    printf("KHO\n");
-                printf("Thoi gian hoan thanh: %d giay\n", elapsed);
-                printf("Oxy con lai: %d%%\n\n", oxy);
+                if (difficulty == 1) printf("DE\n");
+                else if (difficulty == 2) printf("TRUNG BINH\n");
+                else printf("KHO\n");
+                printf("Thoi gian: %d giay\n", elapsed);
+                printf("OXY con lai: %d%%\n\n", oxy);
 
-#ifdef _WIN32
-                Sleep(6000);
-#else
-                usleep(6000000);
-#endif
+                #ifdef _WIN32
+                Sleep(3000);
+                #else
+                usleep(3000000);
+                #endif
+
                 running = 0;
             }
-            needsRedraw = 1; // Vẽ lại sau khi xử lý input
         }
 
-// Delay nhỏ để game mượt, không ăn CPU
-#ifdef _WIN32
-        Sleep(200);
-#else
-        usleep(200000);
-#endif
+        // Delay cho game muot
+        #ifdef _WIN32
+        Sleep(100);
+        #else
+        usleep(100000);
+        #endif
     }
 }
