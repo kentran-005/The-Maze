@@ -141,7 +141,7 @@ void startGame() {
     // Khoi tao mang enemies
     Enemy enemies[MAX_ENEMIES];
     for (int i = 0; i < MAX_ENEMIES; i++) {
-        enemies[i].alive = 0; // Tat ca bat dau chet
+        enemies[i].alive = 0; // Mac dinh tat ca chua spawn
     }
 
     // Vi tri spawn
@@ -216,7 +216,9 @@ void startGame() {
                     usleep(3000000);
                     #endif
                     break;
-                }
+                } 
+            } else {
+                updateEnemyRespawn(&enemies[i], x, y); // Cap nhat respawn
             }
         }
 
@@ -273,7 +275,7 @@ void startGame() {
 
         // Delay cho game muot
         #ifdef _WIN32
-        Sleep(100);
+        Sleep(200);
         #else
         usleep(100000);
         #endif

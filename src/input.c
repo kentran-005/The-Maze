@@ -59,20 +59,19 @@ void handleInput(char key, int *x, int *y, int *running, int *playerFacing) {
         case 'w': 
         case 'W': 
             newY--; 
-            // playerFacing CHỈ CÓ 2 GIÁ TRỊ: 0=trái, 1=phải
-            // Không thay đổi khi di chuyển lên/xuống
+            *playerFacing = 0; // Quay lên
             break;
             
         case 's': 
         case 'S': 
             newY++; 
-            // Không thay đổi facing
+            *playerFacing = 2; // Quay xuống
             break;
             
         case 'a': 
         case 'A': 
             newX--; 
-            *playerFacing = 0;  // Quay trái
+            *playerFacing = 3;  // Quay trái
             break;
             
         case 'd': 
@@ -90,11 +89,8 @@ void handleInput(char key, int *x, int *y, int *running, int *playerFacing) {
             return;  // Phím không hợp lệ
     }
     
-    // Kiểm tra tường (cho phép đi vào exit)
-    if (!isWall(newX, newY)) {
+    if (!isWall(newX, newY) || isExit(newX, newY)) {
         *x = newX;
         *y = newY;
     }
-    
-    // Không check exit ở đây, để game.c lo
 }

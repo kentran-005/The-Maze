@@ -14,10 +14,15 @@ typedef struct {
     int historyY[HISTORY_SIZE];
     int historyIndex;
 
+    int respawnTimer;
+    int spawnX;
+    int spawnY;
+
     int facing; 
 } Enemy;
 
 void initEnemy(Enemy *e, int x, int y);
+void updateEnemyRespawn(Enemy *e, int playerX, int playerY);
 void updateEnemy(Enemy *e, int playerX, int playerY);
 void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, int *running);
 

@@ -80,11 +80,17 @@ void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int nu
             // === VẼ PLAYER ===
             if (x == playerX && y == playerY) {
                 // playerFacing: 0 = trái (<), 1 = phải (>)
-                if (playerFacing == 0) {
-                    printf("\033[1;36m<\033[0m ");  // Quay trái
-                } else {
-                    printf("\033[1;36m>\033[0m ");  // Quay phải
+                const char* icon;
+                switch (playerFacing)
+                {
+                case 0: icon = "^"; break; // Lên
+                case 1: icon = ">"; break; // Phải
+                case 2: icon = "v"; break; // Xuống
+                case 3: icon = "<"; break; // Trái
+                
+                default: icon = "@";
                 }
+                printf("\033[1;36m%s\033[0m ", icon);
                 continue;
             }
 

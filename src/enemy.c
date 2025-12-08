@@ -8,6 +8,7 @@
 #define CHASE_RANGE 8
 #define DIR_CHANGE 8
 #define RANDOM_CHANCE 30
+#define RESPAWN_TIME 50 // 50 ticks = 5 seconds
 
 void initEnemy(Enemy *e, int x, int y) {
     e->x = x;
@@ -20,6 +21,10 @@ void initEnemy(Enemy *e, int x, int y) {
     e->historyIndex = 0;
     
     e->facing = e->currentDir;  // facing = currentDir (0-3)
+
+    e->spawnX = x;
+    e->spawnY = y;
+    e->respawnTimer = 0;
 
     for (int i = 0; i < HISTORY_SIZE; i++) {
         e->historyX[i] = -1;
@@ -53,6 +58,36 @@ int isValidMove(int x, int y) {
         return 0;
     }
     return !isWall(x, y);
+}
+
+void updateEnemyRespawn(Enemy *e, int playerX, int playerY) {
+    if (e->alive) return;
+    
+    e->respawnTimer++;
+    if (e->respawnTimer >= RESPAWN_TIME)
+    // Tim vi tri spawn khong gan player
+    {
+        int spawnX, spawnY;
+        int found = 0;
+        int attempts = 0;
+
+        while (!found && attempts < 20)
+        {
+            spawnX = 2 + rand() % (MAP_WIDTH - 4);
+            spawnY = 2 + rand() % (MAP_HEIGHT - 4);
+
+            // check tuong va khoang cach den player (>=5)
+            if (!isWall(spawnX, spawnY) && getDistance(spawnX, spawnY, playerX, playerY) >= 5)
+            {
+                found = 1;
+            }
+            attempts++;
+        }
+        if (found) {
+            initEnemy(e, spawnX, spawnY);
+            printf("\033[1;33m[+] Quai vat da hoi sinh lai!\033[0m\n");
+        }
+    }
 }
 
 void updateEnemy(Enemy *e, int playerX, int playerY) {
@@ -175,14 +210,11 @@ void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, i
     if (!e->alive) return;
     if (e->x != playerX || e->y != playerY) return;
     
-    // Chuyển đổi playerFacing (0=trái, 1=phải) sang 4 hướng
-    // playerFacing = 0 (trái) = direction 3
-    // playerFacing = 1 (phải) = direction 1
-    int playerDir = (playerFacing == 0) ? 3 : 1;
-    
-    // Kiểm tra đối mặt nhau
-    // Ví dụ: Player hướng phải (1) vs Enemy hướng trái (3)
-    int opposite = (playerDir + 2) % 4;
+    // playerFacing: 0=Lên, 1=Phải, 2=Xuống, 3=Trái (giống enemy.facing)
+    // Hướng đối diện: (facing + 2) % 4
+    // Ví dụ: Lên(0) đối diện Xuống(2), Phải(1) đối diện Trái(3)
+
+    int opposite = (playerFacing + 2) % 4;
     
     if (e->facing == opposite) {
         // Đối mặt nhau → Player giết enemy
