@@ -249,7 +249,7 @@ void startGame() {
             char key = _getch();
             handleInput(key, &x, &y, &running, &playerFacing);
 
-            // Kiem tra WIN
+            // Kiem tra Victory
             if (isExit(x, y)) {
                 clearScreen();
                 printf("\n╔═══════════════════════════════════════╗\n");
@@ -275,7 +275,7 @@ void startGame() {
 
         // Delay cho game muot
         #ifdef _WIN32
-        Sleep(200);
+        Sleep(100);
         #else
         usleep(100000);
         #endif
