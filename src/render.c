@@ -28,13 +28,9 @@ void clearScreen() {
 #endif
 }
 
-void drawPlayer(int x, int y) {
-    // Legacy - không dùng
-}
+void drawPlayer(int x, int y) {}
+void drawEnemy(int x, int y) {}
 
-void drawEnemy(int x, int y) {
-    // Legacy - không dùng
-}
 
 // Vẽ map với 1 enemy (legacy)
 void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
