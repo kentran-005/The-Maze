@@ -73,8 +73,8 @@ void updateEnemyRespawn(Enemy *e, int playerX, int playerY) {
 
         while (!found && attempts < 20)
         {
-            spawnX = 2 + rand() % (MAP_WIDTH - 4);
-            spawnY = 2 + rand() % (MAP_HEIGHT - 4);
+            spawnX = 2 + rand() % (MAP_WIDTH - 10);
+            spawnY = 2 + rand() % (MAP_HEIGHT - 10);
 
             // check tuong va khoang cach den player (>=5)
             if (!isWall(spawnX, spawnY) && getDistance(spawnX, spawnY, playerX, playerY) >= 5)
@@ -165,43 +165,42 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
     // MODE 2: PATROL - Player ở xa
     else {
         e->dirCounter++;
-        
-        int newX = e->x + directions[e->currentDir][0];
-        int newY = e->y + directions[e->currentDir][1];
-        int willBeStuck = isInHistory(e, newX, newY);
-        
-        int suddenChange = (rand() % 100) < (RANDOM_CHANCE / 2);
-        
-        if (!isValidMove(newX, newY) || e->dirCounter >= DIR_CHANGE || willBeStuck || suddenChange) {
-            // Đổi hướng
-            int validDirs[4];
-            int validCount = 0;
-            
-            for (int i = 0; i < 4; i++) {
-                int testX = e->x + directions[i][0];
-                int testY = e->y + directions[i][1];
-                
-                if (isValidMove(testX, testY) && !isInHistory(e, testX, testY)) {
-                    validDirs[validCount++] = i;
-                }
-            }
-            
-            if (validCount > 0) {
-                int randomDir = validDirs[rand() % validCount];
-                e->currentDir = randomDir;
-                e->facing = randomDir;  // Cập nhật facing
-                addToHistory(e, e->x, e->y);
-                e->x += directions[randomDir][0];
-                e->y += directions[randomDir][1];
-                e->dirCounter = 0;
-            }
+
+        int bestDir = -1;
+        int bestDist = 999;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int newX = e->x + directions[i][0];
+            int newY = e->y + directions[i][1];
+
+            if (!isValidMove(newX, newY)) continue;
+
+            int newDist = getDistance(newX, newY, playerX, playerY);
+            if (newDist < bestDist) {
+                bestDist = newDist;
+                bestDir = i;
+            }   
         }
-        else {
-            // Tiếp tục đi thẳng
+        
+
+        int currentX = e->x + directions[e->currentDir][0];
+        int currentY = e->y + directions[e->currentDir][1];
+        int curentDist = getDistance(currentX, currentY, playerX, playerY);
+
+        if (!isValidMove(currentX, currentY) && curentDist <= bestDist + 1 && e->dirCounter < DIR_CHANGE) {
             addToHistory(e, e->x, e->y);
-            e->x = newX;
-            e->y = newY;
-            e->facing = e->currentDir;  // Cập nhật facing
+            e->x = currentX;
+            e->y = currentY;
+            e->facing = e->currentDir;  // update facing
+        } else if (bestDir != -1)
+        {
+            addToHistory(e, e->x, e->y);
+            e->x += directions[bestDir][0];
+            e->y += directions[bestDir][1];
+            e->currentDir = bestDir;
+            e->facing = bestDir;  // update facing
+            e->dirCounter = 0;
         }
     }
 }
@@ -209,19 +208,15 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
 void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, int *running) {
     if (!e->alive) return;
     if (e->x != playerX || e->y != playerY) return;
-    
-    // playerFacing: 0=Lên, 1=Phải, 2=Xuống, 3=Trái (giống enemy.facing)
-    // Hướng đối diện: (facing + 2) % 4
-    // Ví dụ: Lên(0) đối diện Xuống(2), Phải(1) đối diện Trái(3)
 
     int opposite = (playerFacing + 2) % 4;
     
     if (e->facing == opposite) {
-        // Đối mặt nhau → Player giết enemy
+        // Đối mặt nhau → Player kill enemy
         e->alive = 0;
         printf("\033[1;32m[!] Ban da tieu diet 1 quai vat!\033[0m\n");
     } else {
-        // Không đối mặt → Enemy bắt player
+        // Không đối mặt → Enemy kill player
         *running = 0;
     }
 }

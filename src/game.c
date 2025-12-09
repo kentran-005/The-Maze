@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 #ifdef _WIN32
 #include <conio.h>
 #include <windows.h>
@@ -7,7 +9,22 @@
 #include <unistd.h>
 #include <termios.h>
 #include <fcntl.h>
+#endif
 
+#include "game.h"
+#include "render.h"
+#include "input.h"
+#include "enemy.h"
+#include "map.h"
+
+
+#define MAX_OXY 100
+#define TIME_LIMIT 180
+#define MAX_ENEMIES 11
+
+int playerFacing = 1; // 0=left, 1=right
+
+#ifndef _WIN32
 static int kbhit_posix(void) {
     struct termios oldt, newt;
     int ch;
@@ -17,6 +34,7 @@ static int kbhit_posix(void) {
     newt = oldt;
     newt.c_lflag &= ~(ICANON | ECHO);
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
     oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
 
@@ -50,18 +68,30 @@ static int getch_posix(void) {
 #define Sleep(ms) usleep((ms) * 1000)
 #endif
 
-#include "game.h"
-#include "render.h"
-#include "input.h"
-#include <time.h>
-#include "enemy.h"
-#include "map.h"
+static void enterFullscreenConsole() {
+    #ifdef _WIN32
+    // Enable UTF-8 on Windows
+    SetConsoleOutputCP(65001);
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    SetConsoleMode(hOut, dwMode);
+    #endif
 
-#define MAX_OXY 100
-#define TIME_LIMIT 180
-#define MAX_ENEMIES 4
+    printf("\033[?1049h"); // Switch to alternate buffer
+    printf("\033[?25l");   // Hide cursor
+    printf("\033[2J\033[H"); // Clear screen and home cursor
+    fflush(stdout);
+}
 
-int playerFacing = 1; // 0=left, 1=right
+static void leaveFullscreenConsole() {
+    printf("\033[?1049l");   // Show cursor
+    printf("\033[?25h"); // Switch back from alternate buffer
+    fflush(stdout);
+}
+
+
 
 void drawOxyBar(int oxy) {
     int bars = 20;
@@ -83,18 +113,22 @@ void drawOxyBar(int oxy) {
 }
 
 int selectDifficulty() {
-    clearScreen();
+    printf("\033[2J\033[H");
+    fflush(stdout);
+
     printf("\n");
-    printf("╔═══════════════════════════════════════════╗\n");
-    printf("║       CHON DO KHO - SELECT DIFFICULTY     ║\n");
-    printf("╚═══════════════════════════════════════════╝\n");
+    printf("+===========================================+\n");
+    printf("|       CHON DO KHO - SELECT DIFFICULTY     |\n");
+    printf("+===========================================+\n");
     printf("\n");
-    printf("  1. DE (EASY)           - 1 Quai vat\n");
-    printf("  2. TRUNG BINH (NORMAL) - 2 Quai vat\n");
-    printf("  3. KHO (HARD)          - 4 Quai vat\n");
+    printf("  1. DE (EASY)           - 3 Quai vat\n");
+    printf("  2. TRUNG BINH (NORMAL) - 7 Quai vat\n");
+    printf("  3. KHO (HARD)          - 11 Quai vat (!)\n");
     printf("\n");
-    printf("╔═══════════════════════════════════════════╗\n");
-    printf("║  Nhap lua chon (1-3): ");
+    printf("     *** CHU Y: Che do KHO cuc ky kho! ***\n");
+    printf("\n");
+    printf("+===========================================+\n");
+    printf("|  Nhap lua chon (1-3): ");
 
     char choice;
     while (1) {
@@ -108,24 +142,17 @@ int selectDifficulty() {
 }
 
 void startGame() {
-    // Enable UTF-8 on Windows
-    #ifdef _WIN32
-    SetConsoleOutputCP(65001);
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    DWORD dwMode = 0;
-    GetConsoleMode(hOut, &dwMode);
-    dwMode |= 0x0004; // ENABLE_VIRTUAL_TERMINAL_PROCESSING
-    SetConsoleMode(hOut, dwMode);
-    #endif
+
+    enterFullscreenConsole();
 
     int difficulty = selectDifficulty();
     int numEnemies = 0;
 
     switch(difficulty) {
-        case 1: numEnemies = 1; break;
-        case 2: numEnemies = 2; break;
-        case 3: numEnemies = 4; break;
-        default: numEnemies = 1;
+        case 1: numEnemies = 3; break;
+        case 2: numEnemies = 7; break;
+        case 3: numEnemies = 11; break;
+        default: numEnemies = 3;
     }
 
     int running = 1;
@@ -145,12 +172,22 @@ void startGame() {
     }
 
     // Vi tri spawn
-    int spawnPositions[4][2] = {
-        {3, 3},
-        {16, 3},
-        {3, 16},
-        {16, 16}
-    };
+   int spawnPositions[11][2] = {
+    {7, 3},     // Góc trên trái
+    {10, 2},    // Trên giữa
+    {28, 3},    // Trên phải
+
+    {5, 10},    // Trái giữa
+    {17, 9},    // Trung tâm trên
+    {29, 11},   // Phải giữa
+
+    {4, 20},    // Trái dưới
+    {17, 18},   // Trung tâm giữa
+    {30, 18},   // Phải dưới
+
+    {10, 30},   // Dưới trái
+    {22, 30}    // Dưới phải
+};
 
     // Spawn enemies theo do kho
     for (int i = 0; i < numEnemies; i++) {
@@ -158,18 +195,26 @@ void startGame() {
     }
 
     // Man hinh bat dau
-    clearScreen();
-    printf("\n╔═══════════════════════════════════════════╗\n");
+    printf("\033[2J\033[H");
+      printf("\n+===========================================+\n");
     if (difficulty == 1) {
-        printf("║     CHE DO: DE (1 QUAI VAT)              ║\n");
+        printf("|     CHE DO: DE (3 QUAI VAT)              |\n");
     } else if (difficulty == 2) {
-        printf("║     CHE DO: TRUNG BINH (2 QUAI VAT)      ║\n");
+        printf("|     CHE DO: TRUNG BINH (7 QUAI VAT)      |\n");
     } else {
-        printf("║     CHE DO: KHO (4 QUAI VAT)             ║\n");
+        printf("|     CHE DO: KHO (11 QUAI VAT - DIA NGUC!)|\n");
     }
-    printf("╚═══════════════════════════════════════════╝\n");
+    printf("+===========================================+\n");
     printf("\nNhan phim bat ky de bat dau...\n");
     _getch();
+
+    // tracking state de render toi thieu
+    int lastPlayerX = -1, lastPlayerY = -1, lastPlayerFacing = -1;
+    int lastOxy = -1, lastElapsed = -1;
+    int lastEnemyPos[MAX_ENEMIES][2];
+    for (int i = 0; i < MAX_ENEMIES; i++) { lastEnemyPos[i][0] = -1; lastEnemyPos[i][1] = -1; }
+
+    int needsRender = 1;
 
     // GAME LOOP
     while (running) {
@@ -188,10 +233,12 @@ void startGame() {
             printf("\nBAN DA HET OXY TRONG ME CUNG!\n");
             printf("Thoi gian song: %d giay\n\n", elapsed);
 
+            // sleep(3000);
+            // break;
             #ifdef _WIN32
-            Sleep(3000);
+            Sleep(2000);
             #else
-            usleep(3000000);
+            sleep(2);
             #endif
             break;
         }
@@ -210,10 +257,12 @@ void startGame() {
                     printf("\nBAN DA BI QUAI VAT SO %d BAT!\n", i + 1);
                     printf("Thoi gian song: %d giay\n\n", elapsed);
 
+                    // sleep(3000);
+                    // break;
                     #ifdef _WIN32
-                    Sleep(3000);
+                    Sleep(2000);
                     #else
-                    usleep(3000000);
+                    sleep(2);
                     #endif
                     break;
                 } 
@@ -224,25 +273,53 @@ void startGame() {
 
         if (!running) break;
 
-        // RENDER - CHI 1 LAN DUY NHAT
-        clearScreen();
-        printf("╔═══════════════════════════════════════╗\n");
-        printf("║      ESCAPE THE MAZE GAME             ║\n");
-        printf("╚═══════════════════════════════════════╝\n");
-        printf("Thoi gian: %d/%d giay | Quai vat: %d\n\n",
-               elapsed, TIME_LIMIT, numEnemies);
+        // Add logic de chi render khi can thiet
+        int hasChanged = 0;
+        if (x != lastPlayerX || y != lastPlayerY ||playerFacing != lastPlayerFacing)
+        {
+            hasChanged = 1;
+            lastPlayerX = x; lastPlayerY = y; lastPlayerFacing = playerFacing;  
+        }
 
-        drawOxyBar(oxy);
-        printf("\n");
+        if (oxy != lastOxy || elapsed != lastElapsed)
+        {
+            hasChanged = 1;
+            lastOxy = oxy; lastElapsed = elapsed;
+        }
 
-        drawMapWithMultipleEnemies(x, y, enemies, numEnemies, playerFacing);
+        for (int i = 0; i < numEnemies; i++)
+        {
+            int ex = (enemies[i].alive ? enemies[i].x : -1);
+            int ey = (enemies[i].alive ? enemies[i].y : -1);
+            if (ex != lastEnemyPos[i][0] || ey != lastEnemyPos[i][1])
+            {
+                hasChanged = 1;
+                lastEnemyPos[i][0] = ex;
+                lastEnemyPos[i][1] = ey;
+            }
+        }
+        
+        if (!hasChanged || !needsRender) {
+            needsRender = 0;
+            clearScreen();
+            printf("╔═══════════════════════════════════════╗\n");
+            printf("║      ESCAPE THE MAZE GAME             ║\n");
+            printf("╚═══════════════════════════════════════╝\n");
+            printf("Thoi gian: %d/%d giay | Quai vat: %d\n\n",
+                elapsed, TIME_LIMIT, numEnemies);
 
-        printf("\n╔═══════════════════════════════════════╗\n");
-        printf("║ W/A/S/D: Di chuyen | Q: Thoat        ║\n");
-        printf("║ Muc tieu: Tim loi thoat (E)!         ║\n");
-        printf("╚═══════════════════════════════════════╝\n");
+            drawOxyBar(oxy);
+            printf("\n");
 
-        fflush(stdout); // Dam bao output duoc in ra ngay
+            drawMapWithMultipleEnemies(x, y, enemies, numEnemies, playerFacing);
+
+            printf("\n╔═══════════════════════════════════════╗\n");
+            printf("║ W/A/S/D: Di chuyen | Q: Thoat        ║\n");
+            printf("║ Muc tieu: Tim loi thoat (E)!         ║\n");
+            printf("╚═══════════════════════════════════════╝\n");
+
+            fflush(stdout); 
+        }
 
         // XU LY INPUT
         if (_kbhit()) {
@@ -263,21 +340,25 @@ void startGame() {
                 printf("Thoi gian: %d giay\n", elapsed);
                 printf("OXY con lai: %d%%\n\n", oxy);
 
+                // Sleep(3000);
+                // break;
                 #ifdef _WIN32
-                Sleep(3000);
+                Sleep(2000);
                 #else
-                usleep(3000000);
+                sleep(2);
                 #endif
 
                 running = 0;
             }
         }
 
+        // Sleep(60);
         // Delay cho game muot
         #ifdef _WIN32
-        Sleep(200);
+        Sleep(100);
         #else
-        usleep(200000);
+        usleep(100000);
         #endif
     }
+    leaveFullscreenConsole();
 }

@@ -12,22 +12,26 @@
 // Di chuyển con trỏ về (0,0); tránh xóa toàn bộ buffer (đỡ giật)
 void clearScreen() {
     #ifdef _WIN32
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD home = {0, 0};
-    SetConsoleCursorPosition(hConsole, home); // không fill, chỉ đưa con trỏ về đầu
-#else
-    printf("\033[2J\033[H");
+     system("cls");
+    #else
+     system("clear");
+    #endif
     fflush(stdout);
-#endif
+    // printf("\033[H");
+    // fflush(stdout);
+//     #ifdef _WIN32
+//     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+//     COORD home = {0, 0};
+//     SetConsoleCursorPosition(hConsole, home); // không fill, chỉ đưa con trỏ về đầu
+// #else
+//     printf("\033[2J\033[H");
+//     fflush(stdout);
+// #endif
 }
 
-void drawPlayer(int x, int y) {
-    // Legacy - không dùng
-}
+// void drawPlayer(int x, int y) {}
 
-void drawEnemy(int x, int y) {
-    // Legacy - không dùng
-}
+// void drawEnemy(int x, int y) {}
 
 // Append an entire formatted chunk into buffer (truncates if full)
 static void appendFmt(char *buf, size_t bufSize, size_t *offset, const char *fmt, ...) {
@@ -44,46 +48,12 @@ static void appendFmt(char *buf, size_t bufSize, size_t *offset, const char *fmt
     }
 }
 
-// Vẽ map với 1 enemy (legacy)
-void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
-    printf("\n");
-    
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        printf("  ");
-        
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            if (x == playerX && y == playerY) {
-                printf("\033[1;36m😎\033[0m");
-            }
-            else if (enemyAlive && x == enemyX && y == enemyY) {
-                printf("\033[1;31m👻\033[0m");
-            }
-            else if (x == exitX && y == exitY) {
-                printf("\033[1;33m🏆\033[0m");
-            }
-            else if (gameMap[y][x] == '#') {
-                printf("\033[1;37m##\033[0m");
-            }
-            else {
-                printf("  ");
-            }
-        }
-        printf("\n");
-    }
-    
-    printf("\n");
-    printf("  \033[1;36m😎\033[0m = Ban   ");
-    printf("\033[1;31m👻\033[0m = Quai   ");
-    printf("\033[1;33m🏆\033[0m = Exit\n");
-}
-
-// Vẽ map với nhiều enemies
-// ===== NỀN TĨNH (tường/exit/khoảng trống) =====
 static const char *staticCells[MAP_HEIGHT][MAP_WIDTH];
 static int staticInited = 0;
 
 static void ensureStaticCells() {
     if (staticInited) return;
+
     static const char *wallTok  = "\033[1;90m█\033[0m ";
     static const char *exitTok  = "\033[1;33mE\033[0m ";
     static const char *spaceTok = "  ";
@@ -97,11 +67,47 @@ static void ensureStaticCells() {
     staticInited = 1;
 }
 
+// Vẽ map với 1 enemy (legacy)
+// void drawMap(int playerX, int playerY, int enemyX, int enemyY, int enemyAlive) {
+//     printf("\n");
+    
+//     for (int y = 0; y < MAP_HEIGHT; y++) {
+//         printf("  ");
+        
+//         for (int x = 0; x < MAP_WIDTH; x++) {
+//             if (x == playerX && y == playerY) {
+//                 printf("\033[1;36m😎\033[0m");
+//             }
+//             else if (enemyAlive && x == enemyX && y == enemyY) {
+//                 printf("\033[1;31m👻\033[0m");
+//             }
+//             else if (x == exitX && y == exitY) {
+//                 printf("\033[1;33m🏆\033[0m");
+//             }
+//             else if (gameMap[y][x] == '#') {
+//                 printf("\033[1;37m##\033[0m");
+//             }
+//             else {
+//                 printf("  ");
+//             }
+//         }
+//         printf("\n");
+//     }
+    
+//     printf("\n");
+//     printf("  \033[1;36m😎\033[0m = Ban   ");
+//     printf("\033[1;31m👻\033[0m = Quai   ");
+//     printf("\033[1;33m🏆\033[0m = Exit\n");
+// }
+
+// Vẽ map với nhiều enemies
+// ===== NỀN TĨNH (tường/exit/khoảng trống) =====
+
 void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int numEnemies, int playerFacing) {
     ensureStaticCells();
 
     // Buffer hóa để giảm số lần write ra terminal
-    char buffer[4096];
+    char buffer[20000];
     size_t off = 0;
 
     appendFmt(buffer, sizeof(buffer), &off, "\n");
@@ -112,15 +118,13 @@ void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int nu
         for (int x = 0; x < MAP_WIDTH; x++) {
             // === VẼ PLAYER ===
             if (x == playerX && y == playerY) {
-                const char* icon;
+                const char* icon = "@";
                 switch (playerFacing)
                 {
                 case 0: icon = "^"; break; // Lên
                 case 1: icon = ">"; break; // Phải
                 case 2: icon = "v"; break; // Xuống
                 case 3: icon = "<"; break; // Trái
-                
-                default: icon = "@";
                 }
                 appendFmt(buffer, sizeof(buffer), &off, "\033[1;36m%s\033[0m ", icon);
                 continue;
@@ -136,7 +140,6 @@ void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int nu
                         case 1: icon = ">"; break;
                         case 2: icon = "v"; break;
                         case 3: icon = "<"; break;
-                        default: icon = "M";
                     }
                     appendFmt(buffer, sizeof(buffer), &off, "\033[1;31m%s\033[0m ", icon);
                     isEnemy = 1;
@@ -151,10 +154,8 @@ void drawMapWithMultipleEnemies(int playerX, int playerY, Enemy *enemies, int nu
         appendFmt(buffer, sizeof(buffer), &off, "\n");
     }
 
-    appendFmt(buffer, sizeof(buffer), &off, "\n");
-    appendFmt(buffer, sizeof(buffer), &off, "  \033[1;36m< >\033[0m = Ban (Player)   ");
-    appendFmt(buffer, sizeof(buffer), &off, "\033[1;31m^ > v <\033[0m = Quai vat   ");
-    appendFmt(buffer, sizeof(buffer), &off, "\033[1;33mE\033[0m = Exit\n");
+    
+    appendFmt(buffer, sizeof(buffer), &off, "\n^ > v < = Ban | ^ > v < = Quai | E = Exit\n");
 
     fwrite(buffer, 1, off, stdout);
     fflush(stdout);

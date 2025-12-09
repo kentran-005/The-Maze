@@ -1,8 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
-#define MAP_WIDTH 20
-#define MAP_HEIGHT 20
-extern char gameMap[MAP_HEIGHT][MAP_WIDTH];
+#define MAP_WIDTH 35
+#define MAP_HEIGHT 35
+extern char gameMap[MAP_HEIGHT][MAP_WIDTH + 1];
 extern int playerStartX;
 extern int playerStartY;
 extern int enemyStartX;
