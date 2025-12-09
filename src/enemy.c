@@ -214,8 +214,12 @@ void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, i
     if (e->facing == opposite) {
         // Đối mặt nhau → Player kill enemy
         e->alive = 0;
+        // CHÈN ÂM THANH TIÊU DIỆT QUÁI VẬT Ở ĐÂY
+
         printf("\033[1;32m[!] Ban da tieu diet 1 quai vat!\033[0m\n");
     } else {
+        // CHÈN ÂM THANH PLAYER BỊ QUÁI VẬT KILL Ở ĐÂY
+        
         // Không đối mặt → Enemy kill player
         *running = 0;
     }

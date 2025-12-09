@@ -5,10 +5,12 @@ SRC = main.c src/*.c
 ifeq ($(OS),Windows_NT)
     TARGET = game.exe
     LIBS = -lwinmm
+    LDFLAGS = -lwinmm
     RM = del /Q
 else
     TARGET = game
     LIBS =
+    LDFLAGS =
     RM = rm -f
 endif
 
@@ -36,5 +38,5 @@ endif
 # clean: make clean
 # run: make run
 
-# windows run: mingw32-make run
+# windows run: mingw32-make run, 
 # windows clean: mingw32-make clean

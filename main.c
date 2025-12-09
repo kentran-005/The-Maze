@@ -6,6 +6,9 @@
 int main() {
     char choice;
 
+    // TẠO AUDIO
+    // initAudio();
+
     do {
         // Xóa màn hình trước khi bắt đầu
         #ifdef _WIN32
@@ -15,11 +18,12 @@ int main() {
         #endif
 
         printf("Starting game...\n");
+        // Phát nhạc nền
         playBackgroundMusic();
 
         // Bắt đầu game (có menu chọn độ khó bên trong)
         startGame();
-
+        // Dừng nhạc nền
         stopBackgroundMusic();
 
         // ===== PHẦN ĐÃ SỬA: KIỂM TRA Y / N HỢP LỆ =====
@@ -58,6 +62,9 @@ int main() {
     printf("║     THANKS FOR PLAYING!               ║\n");
     printf("╚═══════════════════════════════════════╝\n");
     printf("\n");
+
+    // DỌN DẸP AUDIO
+    // cleanupAudio();
 
     return 0;
 }

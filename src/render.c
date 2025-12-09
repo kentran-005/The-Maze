@@ -15,7 +15,6 @@ void clearScreen() {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD home = {0, 0};
     SetConsoleCursorPosition(hOut, home);
-    // Xóa buffer (optional - slower nhưng sạch hơn)
     DWORD dwSize = 0;
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     GetConsoleScreenBufferInfo(hOut, &csbi);
@@ -29,35 +28,6 @@ void clearScreen() {
     fflush(stdout);
 #endif
 }
-// void clearScreen() {
-//     // #ifdef _WIN32
-//     //  system("cls");
-//     // #else
-//     //  system("clear");
-//     // #endif
-//     // fflush(stdout);
-//     #ifdef _WIN32
-//     printf("\033[H");
-//     system("cls");
-//     #else
-//     system("clear");
-//     #endif
-//     fflush(stdout);
-//     //printf("\033[H");
-//     //fflush(stdout);
-// //     #ifdef _WIN32
-// //     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-// //     COORD home = {0, 0};
-// //     SetConsoleCursorPosition(hConsole, home); // không fill, chỉ đưa con trỏ về đầu
-// // #else
-// //     printf("\033[2J\033[H");
-// //     fflush(stdout);
-// // #endif
-// }
-
-// void drawPlayer(int x, int y) {}
-
-// void drawEnemy(int x, int y) {}
 
 // Append an entire formatted chunk into buffer (truncates if full)
 static void appendFmt(char *buf, size_t bufSize, size_t *offset, const char *fmt, ...) {

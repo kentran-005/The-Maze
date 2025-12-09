@@ -113,6 +113,7 @@ void drawOxyBar(int oxy) {
 }
 
 int selectDifficulty() {
+    // playMenuSound(); // CHÈN CODE PHÁT NHẠC MENU Ở ĐÂY
     printf("\033[2J\033[H");
     fflush(stdout);
 
@@ -226,6 +227,10 @@ void startGame() {
 
         // Het OXY
         if (oxy <= 0) {
+            // DỪNG NHẠC NỀN
+
+            // CHÈN NHẠC LOSS KHI HẾT OXY Ở ĐÂY
+
             clearScreen();
             printf("\n╔═══════════════════════════════════════╗\n");
             printf("║        HET OXY - GAME OVER            ║\n");
@@ -250,6 +255,8 @@ void startGame() {
                 checkEnemyCollision(&enemies[i], x, y, playerFacing, &running);
 
                 if (!running) {
+                    // CHỈ GỌI MỖI HÀM DỪNG NHẠC NỀN Ở ĐÂY
+
                     clearScreen();
                     printf("\n╔═══════════════════════════════════════╗\n");
                     printf("║     QUAI VAT - GAME OVER              ║\n");
@@ -328,6 +335,10 @@ void startGame() {
 
             // Kiem tra Victory
             if (isExit(x, y)) {
+                // DỪNG NHẠC NỀN Ở ĐÂY
+
+                // CHÈN NHẠC VICTORY Ở ĐÂY
+
                 clearScreen();
                 printf("\n╔═══════════════════════════════════════╗\n");
                 printf("║       CHIEN THANG! 🎉                ║\n");
