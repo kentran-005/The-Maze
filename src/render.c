@@ -11,23 +11,49 @@
 
 // Di chuyển con trỏ về (0,0); tránh xóa toàn bộ buffer (đỡ giật)
 void clearScreen() {
-    #ifdef _WIN32
-     system("cls");
-    #else
-     system("clear");
-    #endif
+#ifdef _WIN32
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD home = {0, 0};
+    SetConsoleCursorPosition(hOut, home);
+    // Xóa buffer (optional - slower nhưng sạch hơn)
+    DWORD dwSize = 0;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hOut, &csbi);
+    dwSize = csbi.dwSize.X * csbi.dwSize.Y;
+    COORD coord = {0, 0};
+    DWORD cCharsWritten;
+    FillConsoleOutputCharacter(hOut, ' ', dwSize, coord, &cCharsWritten);
+    SetConsoleCursorPosition(hOut, home);
+#else
+    printf("\033[2J\033[H");
     fflush(stdout);
-    // printf("\033[H");
-    // fflush(stdout);
-//     #ifdef _WIN32
-//     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//     COORD home = {0, 0};
-//     SetConsoleCursorPosition(hConsole, home); // không fill, chỉ đưa con trỏ về đầu
-// #else
-//     printf("\033[2J\033[H");
-//     fflush(stdout);
-// #endif
+#endif
 }
+// void clearScreen() {
+//     // #ifdef _WIN32
+//     //  system("cls");
+//     // #else
+//     //  system("clear");
+//     // #endif
+//     // fflush(stdout);
+//     #ifdef _WIN32
+//     printf("\033[H");
+//     system("cls");
+//     #else
+//     system("clear");
+//     #endif
+//     fflush(stdout);
+//     //printf("\033[H");
+//     //fflush(stdout);
+// //     #ifdef _WIN32
+// //     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+// //     COORD home = {0, 0};
+// //     SetConsoleCursorPosition(hConsole, home); // không fill, chỉ đưa con trỏ về đầu
+// // #else
+// //     printf("\033[2J\033[H");
+// //     fflush(stdout);
+// // #endif
+// }
 
 // void drawPlayer(int x, int y) {}
 

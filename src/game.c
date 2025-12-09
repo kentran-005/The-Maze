@@ -233,14 +233,14 @@ void startGame() {
             printf("\nBAN DA HET OXY TRONG ME CUNG!\n");
             printf("Thoi gian song: %d giay\n\n", elapsed);
 
-            // sleep(3000);
-            // break;
-            #ifdef _WIN32
             Sleep(2000);
-            #else
-            sleep(2);
-            #endif
             break;
+            // #ifdef _WIN32
+            // Sleep(3000);
+            // #else
+            // sleep(2);
+            // #endif
+            // break;
         }
 
         // Cap nhat TAT CA enemies
@@ -257,14 +257,14 @@ void startGame() {
                     printf("\nBAN DA BI QUAI VAT SO %d BAT!\n", i + 1);
                     printf("Thoi gian song: %d giay\n\n", elapsed);
 
-                    // sleep(3000);
-                    // break;
-                    #ifdef _WIN32
                     Sleep(2000);
-                    #else
-                    sleep(2);
-                    #endif
                     break;
+                    // #ifdef _WIN32
+                    // Sleep(3000);
+                    // #else
+                    // sleep(2);
+                    // #endif
+                    // break;
                 } 
             } else {
                 updateEnemyRespawn(&enemies[i], x, y); // Cap nhat respawn
@@ -340,25 +340,25 @@ void startGame() {
                 printf("Thoi gian: %d giay\n", elapsed);
                 printf("OXY con lai: %d%%\n\n", oxy);
 
-                // Sleep(3000);
-                // break;
-                #ifdef _WIN32
                 Sleep(2000);
-                #else
-                sleep(2);
-                #endif
+                break;
+                // #ifdef _WIN32
+                // Sleep(3000);
+                // #else
+                // sleep(2);
+                // #endif
 
                 running = 0;
             }
         }
 
-        // Sleep(60);
+        Sleep(120);
         // Delay cho game muot
-        #ifdef _WIN32
-        Sleep(100);
-        #else
-        usleep(100000);
-        #endif
+        // #ifdef _WIN32
+        // Sleep(100);
+        // #else
+        // usleep(100000);
+        // #endif
     }
     leaveFullscreenConsole();
 }
