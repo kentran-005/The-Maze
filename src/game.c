@@ -118,7 +118,7 @@ void drawOxyBar(int oxy) {
 
 int selectDifficulty() {
     loadProgress(&gameProgress);
-    // playMenuSound(); // CHÈN CODE PHÁT NHẠC MENU Ở ĐÂY
+    playMenuSound(); // Phat nhac menu
     printf("\033[2J\033[H");
     fflush(stdout);
 
@@ -186,7 +186,7 @@ int selectDifficulty() {
 }
 
 void startGame() {
-
+    playInGame(); // Phat nhac trong game
     enterFullscreenConsole();
 
     int difficulty = selectDifficulty();
@@ -270,9 +270,9 @@ void startGame() {
 
         // Het OXY
         if (oxy <= 0) {
-            // DỪNG NHẠC NỀN
+            //stopInGame(); // DUNG NHAC TRONG GAME O DAY
 
-            // CHÈN NHẠC LOSS KHI HẾT OXY Ở ĐÂY
+            playDrowningSound(); // CHÈN CODE PHÁT NHẠC ĐUỐI NƯỚC Ở ĐÂY
 
             clearScreen();
             printf("\n╔═══════════════════════════════════════╗\n");
@@ -299,6 +299,7 @@ void startGame() {
 
                 if (!running) {
                     // CHỈ GỌI MỖI HÀM DỪNG NHẠC NỀN Ở ĐÂY
+                    playPlayerKilled(); // CHÈN CODE PHÁT NHẠC NGƯỜI CHƠI BỊ GIẾT Ở ĐÂY
 
                     clearScreen();
                     printf("\n╔═══════════════════════════════════════╗\n");
@@ -377,10 +378,13 @@ void startGame() {
             handleInput(key, &x, &y, &running, &playerFacing);
 
             // Kiem tra Victory
-            if (isExit(x, y)) {
+            if (isExit(x, y)) { //oke
                 // DỪNG NHẠC NỀN Ở ĐÂY
+                //stopInGame(); // DUNG NHAC TRONG GAME O DAY
+
 
                 // CHÈN NHẠC VICTORY Ở ĐÂY
+                playVictoryMusic(); // CHÈN CODE PHÁT NHẠC CHIẾN THẮNG Ở ĐÂY
 
                 clearScreen();
                 printf("\n╔═══════════════════════════════════════╗\n");
