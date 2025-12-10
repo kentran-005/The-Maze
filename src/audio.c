@@ -33,10 +33,10 @@ void cleanupAudio(void) {
 }
 
 // ===== CHÈN CODE PHÁT NHẠC NỀN VÀO ĐÂY =====
-void playBackgroundMusic(void) {
+void playBackgroundMusic(void) { //x nhac nen
 #ifdef _WIN32
     // Windows: Dùng PlaySound (loop)
-    PlaySound("assets/background.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    PlaySound("assets/BackGroundMoi.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 #else
     // macOS/Linux: Dùng afplay (Mac) hoặc aplay (Linux)
     bgMusicPid = fork();
@@ -72,7 +72,7 @@ void stopBackgroundMusic(void) {
 }
 
 //vua them 2h49:->
-void playLossMusic(void) {
+void playLossMusic(void) { //nhac thua kkk
     const char *filename = "assets/lossmusic.wav"; //
 #ifdef _WIN32
     // Windows: Dùng PlaySound
@@ -107,9 +107,9 @@ void playLossMusic(void) {
 }
 
 //vua them 
-void playVictoryMusic(void) {
+void playVictoryMusic(void) { //nhac winx
    
-    const char *filename = "assets/winmusic.wav"; // thay ten file win
+    const char *filename = "assets/VictoryN.wav"; // thay ten file win
 
 #ifdef _WIN32
     // Windows: Dùng PlaySound
@@ -142,4 +142,176 @@ void playVictoryMusic(void) {
 #endif
 }
 
+void playDrowningSound(void) { //nhac duoi nuoc x
+   
+    const char *filename = "assets/PlayerKilledFemale.wav"; // thay ten file win
+
+#ifdef _WIN32
+    // Windows: Dùng PlaySound
+    PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC);
+#else
+    // macOS/Linux: Tạo tiến trình con để chạy afplay/aplay.
+    pid_t sfxPid = fork();
+    
+    if (sfxPid == 0) {
+        // Child process
+        // Ken: thêm 
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        
+        #ifdef __APPLE__
+        // macOS: afplay
+        execlp("afplay", "afplay", "-q", "1", filename, NULL);
+        #else
+        // Linux: aplay
+        execlp("aplay", "aplay", "-q", filename, NULL);
+        #endif
+        
+        // Thoát tiến trình con nếu execlp thất bại
+        exit(0); 
+    }
+
+#endif
+}
+void playMenuSound(void) { //nhac menu x
+   
+    const char *filename = "assets/MenuSound.wav"; // thay ten file win
+
+#ifdef _WIN32
+    // Windows: Dùng PlaySound
+    PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC);
+#else
+    // macOS/Linux: Tạo tiến trình con để chạy afplay/aplay.
+    pid_t sfxPid = fork();
+    
+    if (sfxPid == 0) {
+        // Child process
+        // Ken: thêm 
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        
+        #ifdef __APPLE__
+        // macOS: afplay
+        execlp("afplay", "afplay", "-q", "1", filename, NULL);
+        #else
+        // Linux: aplay
+        execlp("aplay", "aplay", "-q", filename, NULL);
+        #endif
+        
+        // Thoát tiến trình con nếu execlp thất bại
+        exit(0); 
+    }
+
+#endif
+}
+
+void playPlayerKilled(void) { //nguoi choi bi giet x
+    const char *filename = "assets/DrowningSound.wav"; // thay ten file win
+
+#ifdef _WIN32
+    // Windows: Dùng PlaySound
+    PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC);
+#else
+    // macOS/Linux: Tạo tiến trình con để chạy afplay/aplay.
+    pid_t sfxPid = fork();
+    
+    if (sfxPid == 0) {
+        // Child process
+        // Ken: thêm 
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        
+        #ifdef __APPLE__
+        // macOS: afplay
+        execlp("afplay", "afplay", "-q", "1", filename, NULL);
+        #else
+        // Linux: aplay
+        execlp("aplay", "aplay", "-q", filename, NULL);
+        #endif
+        
+        // Thoát tiến trình con nếu execlp thất bại
+        exit(0); 
+    }
+
+#endif
+}
+
+void playSuka(void) { //Quai bi nguoi choi killed x
+    
+    const char *filename = "assets/MonsterKilled.wav"; // thay ten file win
+
+#ifdef _WIN32
+    // Windows: Dùng PlaySound
+    PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC);
+#else
+    // macOS/Linux: Tạo tiến trình con để chạy afplay/aplay.
+    pid_t sfxPid = fork();
+    
+    if (sfxPid == 0) {
+        // Child process
+        // Ken: thêm 
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        
+        #ifdef __APPLE__
+        // macOS: afplay
+        execlp("afplay", "afplay", "-q", "1", filename, NULL);
+        #else
+        // Linux: aplay
+        execlp("aplay", "aplay", "-q", filename, NULL);
+        #endif
+        
+        // Thoát tiến trình con nếu execlp thất bại
+        exit(0); 
+    }
+
+#endif
+}
+void playInGame(void) { //nhac khi dang choi
+    
+    const char *filename = "assets/SoundPlaying.wav"; // thay ten file win
+
+#ifdef _WIN32
+    // Windows: Dùng PlaySound
+    PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC);
+#else
+    // macOS/Linux: Tạo tiến trình con để chạy afplay/aplay.
+    pid_t sfxPid = fork();
+    
+    if (sfxPid == 0) {
+        // Child process
+        // Ken: thêm 
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
+        
+        #ifdef __APPLE__
+        // macOS: afplay
+        execlp("afplay", "afplay", "-q", "1", filename, NULL);
+        #else
+        // Linux: aplay
+        execlp("aplay", "aplay", "-q", filename, NULL);
+        #endif
+        
+        // Thoát tiến trình con nếu execlp thất bại
+        exit(0); 
+    }
+
+#endif
+}
+// neu can thi stopInGame(){} or k thi th
 #endif
