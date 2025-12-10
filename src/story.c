@@ -93,48 +93,123 @@ void typeText(const char *text, int delayMs) {
         sleep_ms(delayMs);
     }
 }
-
-void showStoryEasy(void) {
+void showPrologue(void) {
+    printf("\n\n");
+    printf("╔═══════════════════════════════════════════════╗\n");
+    printf("║                                               ║\n");
+    printf("║              T H E   M A Z E                  ║\n");
+    printf("║                                               ║\n");
+    printf("║           「 Mở Đầu: Bức Thư Bí Ẩn 」         ║\n");
+    printf("║                                               ║\n");
+    printf("╚═══════════════════════════════════════════════╝\n\n");
+    
+    sleep_ms(1500);
+    
+    typeText("Sa mạc Mesopotamia, năm 2024...\n\n", 30);
+    sleep_ms(1000);
+    
+    typeText("Nhà khảo cổ học Cyr nhận được một bức thư không người gửi.\n", 30);
+    sleep_ms(800);
+    typeText("Trong đó là tọa độ dẫn tới một công trình cổ đại\n", 30);
+    sleep_ms(800);
+    typeText("chưa từng được ghi nhận trong lịch sử...\n\n", 30);
+    sleep_ms(1200);
+    
+    printf("+-----------------------------------------------+\n");
+    printf("|  \"Nếu ngươi tìm kiếm sự thật về quá khứ,     |\n");
+    printf("|   hãy đến nơi mặt trời chạm đất.             |\n");
+    printf("|   Dưới lớp cát ngàn năm là lời giải đáp       |\n");
+    printf("|   cho những gì ngươi đã quên...\"             |\n");
+    printf("+-----------------------------------------------+\n\n");
+    
+    sleep_ms(1500);
+    
+    typeText("Sau nhiều ngày tìm kiếm, Cyr đứng trước cánh cửa hầm bí ẩn.\n", 30);
+    sleep_ms(800);
+    typeText("Trên cửa khắc hình tượng nữ thần biển cả cổ đại - Tiamat.\n", 30);
+    sleep_ms(800);
+    typeText("Và một dòng chữ bằng chữ hình nêm:\n\n", 30);
+    sleep_ms(1000);
+    
+    printf("     「 Kẻ bước vào đây sẽ gặp lại chính mình 」\n\n");
+    sleep_ms(1500);
+    
+    typeText("Không biết tại sao, tim Cyr đập mạnh...\n", 30);
+    sleep_ms(500);
+    typeText("Như thể nơi này đang gọi tên anh.\n", 30);
+    sleep_ms(500);
+    typeText("Như thể... anh từng ở đây rồi.\n\n", 30);
+    sleep_ms(1500);
+    
+    printf("╔═══════════════════════════════════════════════╗\n");
+    printf("║         Hành trình bắt đầu từ đây...         ║\n");
+    printf("╚═══════════════════════════════════════════════╝\n\n");
+    
+    printf("Nhấn Enter để bước vào mê cung...");
+    getchar();
+}
+void showInterludeAfterEasy(void) {
     printf("\n");
     printf("+===============================================+\n");
-    printf("|          CHUONG I: xxxxxxxxx                  |\n");
+    printf("|              Chương 1: Hồi Ức Mờ Nhạt        |\n");
     printf("+===============================================+\n\n");
     
-    sleep_ms(1000);
-    // playStoryFromFile("story_easy.txt", 30);
-
-    printf("+===============================================+\n");
-    printf("|          CHE DO TRUNG BINH DA MO              |\n");
-    printf("+===============================================+\n\n");
-
-    printf("\nNhan phim bat ky de tiep tuc...");
+    typeText("Trong giấc mơ mơ hồ, Cyr nghe thấy tiếng sóng...\n", 30);
+    sleep_ms(800);
+    typeText("Một giọng nói xa xăm vọng lại:\n", 30);
+    sleep_ms(500);
+    typeText("\"Con... có nhớ ta không?\"\n\n", 30);
+    sleep_ms(1200);
+    
+    printf("Hình ảnh một bóng dáng khổng lồ hiện ra giữa màn đêm.\n");
+    printf("Nhưng mọi thứ lại tan biến khi Cyr tỉnh dậy...\n\n");
+    
+    printf("Nhấn Enter để tiếp tục...");
     getchar();
 }
 
-void showStoryNormal(void) {
+void showInterludeAfterNormal(void) {
     printf("\n");
     printf("+===============================================+\n");
-    printf("|          CHUONG II: xxxxxxxxx                 |\n");
+    printf("|           Chương 2: Mảnh Ghép Quá Khứ       |\n");
     printf("+===============================================+\n\n");
     
-    sleep_ms(1000);
-    // playStoryFromFile("story_normal.txt", 30);
-
-    printf("+===============================================+\n");
-    printf("|            CHE DO KHO DA MO                   |\n");
-    printf("+===============================================+\n\n");
-
-    printf("\nNhan phim bat ky de tiep tuc...");
+    typeText("Lần này, giấc mơ rõ ràng hơn...\n", 30);
+    sleep_ms(800);
+    typeText("Cyr nhìn thấy chính mình đang đứng trước một ngôi đền cổ.\n", 30);
+    sleep_ms(500);
+    typeText("Trên tay là một viên đá phát sáng màu xanh thẫm.\n\n", 30);
+    sleep_ms(1200);
+    
+    printf("\"Kingu... đứa con của ta...\"\n");
+    sleep_ms(800);
+    printf("Giọng nói ấy... tại sao lại quen thuộc đến thế?\n\n");
+    
+    printf("Nhấn Enter để tiếp tục...");
     getchar();
 }
 
-void showStoryHard(void) {
+void showInterludeAfterHard(void) {
     printf("\n");
     printf("+===============================================+\n");
-    printf("|          CHUONG III: xxxxxxxxx                |\n");
+    printf("|            Chương 3: Mộng Tàn         |\n");
     printf("+===============================================+\n\n");
     
+    typeText("Cyr đứng trước gương, nhưng người trong gương không phải là anh.\n", 30);
     sleep_ms(1000);
+    typeText("Đó là một người mang dánh hình tương đương cùng mái tóc dài và sợi xích trên tay.\n", 30);
+    sleep_ms(800);
+    typeText("Và viên đá... đang nằm ngay trong lồng ngực anh ta.\n\n", 30);
+    sleep_ms(1500);
+    
+    printf("\"Con đã sẵn sàng chấp nhận số phận chưa?\"\n");
+    sleep_ms(1000);
+    printf("\"Hay con sẽ tiếp tục chạy trốn?\"\n\n");
+    
+    printf("Nhấn Enter để tiếp tục...");
+    getchar();
+}
+
     // playStoryFromFile("story_hard.txt", 30);
 
     printf("+===============================================+\n");
@@ -155,7 +230,7 @@ void showSecretEnding (void) {
     printf("\n");
     printf("+===============================================+\n");
     printf("|                                               |\n");
-    printf("|          Secret Ending.                       |\n");
+    printf("|          Trái tim trên tay từ từ tan biến đi và cũng là lúc thuỷ triều đen dần dần phá huỷ toàn bộ công trình mê cung. Sự sống của Cyr đã hoàn toàn biến mất và thay vào đó là Kingu trỗi dậy thống lĩnh toàn bộ quyền năng xa xưa của hắn ,Để lần nữa chinh phạt cùng Tiamat.                     |\n");
     printf("|                                               |\n");
     printf("+===============================================+\n\n");
     
@@ -167,7 +242,7 @@ void showSecretEnding (void) {
     printf("|          CHUC MUNG! BAN DA HOAN THANH.        |\n");
     printf("|                    THE-MAZE                   |\n");
     printf("|                                               |\n");
-    printf("|               TRUE ENDING UNLOCKED?           |\n");
+    printf("|               TRUE ENDING UNLOCKED           |\n");
     printf("|                                               |\n");
     printf("+===============================================+\n\n");
 
