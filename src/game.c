@@ -129,12 +129,9 @@ int selectDifficulty() {
     printf("+===========================================+\n");
     printf("\n");
     printf("  1. DE (EASY)           - 3 Quai vat\n");
-    printf("  2. TRUNG BINH (NORMAL) - 7 Quai vat\n"),
-            gameProgress.easyCompleted ? "" : "[LOCKED]";
-    printf("  3. KHO (HARD)          - 11 Quai vat (!)\n"),
-            gameProgress.normalCompleted ? "" : "[LOCKED]";
-    printf("  4.. SECRET ENDING           %s\n"),
-            checkSecretEnding(&gameProgress) ? "" : "[LOCKED]";
+    printf("  2. TRUNG BINH (NORMAL) - 7 Quai vat %s\n", gameProgress.easyCompleted ? "" : "[LOCKED]");
+    printf("  3. KHO (HARD)          - 11 Quai vat %s\n", gameProgress.normalCompleted ? "" : "[LOCKED]");
+    printf("  4. SECRET ENDING           %s\n",  checkSecretEnding(&gameProgress) ? "[AVAILABLE]" : "[LOCKED]");
     printf("\n");
     printf("     *** CHU Y: Che do KHO cuc ky kho! ***\n");
     printf("\n");
@@ -352,7 +349,7 @@ void startGame() {
             }
         }
         
-        if (!hasChanged || !needsRender) {
+        if (hasChanged || needsRender) {
             needsRender = 0;
             clearScreen();
             printf("╔═══════════════════════════════════════╗\n");
@@ -408,7 +405,7 @@ void startGame() {
                 saveProgress(&gameProgress);
 
                 Sleep(2000);
-                break;
+                
                 // #ifdef _WIN32
                 // Sleep(3000);
                 // #else
@@ -435,6 +432,7 @@ void startGame() {
                         showSecretEnding();
                     }
                 }
+                break;
                 running = 0;
             }
         }

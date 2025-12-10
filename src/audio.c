@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -9,7 +10,10 @@
 #else
 #include <unistd.h>
 #include <signal.h>
+#include <sys/wait.h>
 #endif
+
+#if AUDIO_DISABLED
 
 // Biến lưu trữ process ID cho background music
 #ifdef _WIN32
@@ -38,12 +42,19 @@ void playBackgroundMusic(void) {
     bgMusicPid = fork();
     if (bgMusicPid == 0) {
         // Child process
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
         #ifdef __APPLE__
-        execlp("afplay", "afplay", "-q", "1", "assets/background.wav", "--loop", "0", NULL);
+        execlp("afplay", "afplay", "-q", "1", "assets/background.wav", NULL);
         #else
         execlp("aplay", "aplay", "-q", "assets/background.wav", NULL);
         #endif
         exit(1);
+    }else if (bgMusicPid < 0) {
+        printf("[Audio] Warning: Could not fork for background music\n");
     }
 #endif
 }
@@ -54,6 +65,7 @@ void stopBackgroundMusic(void) {
 #else
     if (bgMusicPid > 0) {
         kill(bgMusicPid, SIGTERM);
+        waitpid(bgMusicPid, NULL, 0);
         bgMusicPid = -1;
     }
 #endif
@@ -72,6 +84,11 @@ void playLossMusic(void) {
     // Logic chỉ chạy nếu fork() thành công và đây là tiến trình con.
     if (sfxPid == 0) {
         // Child process
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
         
         #ifdef __APPLE__
         // macOS: afplay
@@ -87,7 +104,7 @@ void playLossMusic(void) {
 
 #endif
 }
-// audio.c
+
 //vua them 
 void playVictoryMusic(void) {
    
@@ -102,6 +119,11 @@ void playVictoryMusic(void) {
     
     if (sfxPid == 0) {
         // Child process
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull != -1) {
+            dup2(devnull, STDERR_FILENO);
+            close(devnull);
+        }
         
         #ifdef __APPLE__
         // macOS: afplay
@@ -117,5 +139,5 @@ void playVictoryMusic(void) {
 
 #endif
 }
-//*
 
+#endif

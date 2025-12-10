@@ -188,7 +188,7 @@ void updateEnemy(Enemy *e, int playerX, int playerY) {
         int currentY = e->y + directions[e->currentDir][1];
         int curentDist = getDistance(currentX, currentY, playerX, playerY);
 
-        if (!isValidMove(currentX, currentY) && curentDist <= bestDist + 1 && e->dirCounter < DIR_CHANGE) {
+        if (isValidMove(currentX, currentY) && curentDist <= bestDist + 1 && e->dirCounter < DIR_CHANGE) {
             addToHistory(e, e->x, e->y);
             e->x = currentX;
             e->y = currentY;
@@ -219,7 +219,7 @@ void checkEnemyCollision(Enemy *e, int playerX, int playerY, int playerFacing, i
         printf("\033[1;32m[!] Ban da tieu diet 1 quai vat!\033[0m\n");
     } else {
         // CHÈN ÂM THANH PLAYER BỊ QUÁI VẬT KILL Ở ĐÂY
-        
+
         // Không đối mặt → Enemy kill player
         *running = 0;
     }

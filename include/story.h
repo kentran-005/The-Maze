@@ -14,12 +14,15 @@ typedef struct {
 void loadProgress(GameProgress *progress);
 void saveProgress(GameProgress *progress);
 
+
+
+void typeText(const char *text, int delayMs);
+
 // show story after completing the game
 
 void showStoryEasy (void);
 void showStoryNormal (void);
 void showStoryHard (void);
-void typeText(const char *text, int delayMs);
 
 // check/show secret ending
 
@@ -28,6 +31,6 @@ void showSecretEnding (void);
 
 // Menu progress
 
-static void showProgressMenu(GameProgress *progress);
+void showProgressMenu(GameProgress *progress);
 
 #endif
