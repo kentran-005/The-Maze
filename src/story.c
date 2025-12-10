@@ -17,7 +17,7 @@ void playStoryFromFile(const char *filename, int delayMs) {
     char line[512];
     while (fgets(line, sizeof(line), f)) {
         typeText(line, delayMs);
-        SLEEP(100);
+        sleep(100);
     }
 
     fclose(f);
@@ -51,10 +51,10 @@ void loadStory() {
 
 // Load/save progress
 
-void loadProgress(GameProrogress *progress) {
+void loadProgress(GameProgress *progress) {
     FILE *f = fopen(PROGRESS_FILE, "rb");
     if (!f) {
-        fread(progress, sizeof(GameProrogress), 1, f);
+        fread(progress, sizeof(GameProgress), 1, f);
         fclose(f);
     } else
     {
@@ -65,10 +65,10 @@ void loadProgress(GameProrogress *progress) {
     }
 }
 
-void saveProgress(GameProrogress *progress) {
+void saveProgress(GameProgress *progress) {
     FILE *f = fopen(PROGRESS_FILE, "wb");
     if (!f) {
-        fwrite(progress, sizeof(GameProrogress), 1, f);
+        fwrite(progress, sizeof(GameProgress), 1, f);
         fclose(f);
         printf("\nProgress saved.\n");
     }
@@ -80,7 +80,7 @@ static void typeText(const char *text, int delayMs) {
     for (int i = 0; text[i] != '\0'; i++) {
         putchar(text[i]);
         fflush(stdout);
-        SLEEP(delayMs);
+        Sleep(delayMs);
     }
 }
 
@@ -90,7 +90,7 @@ void showStoryEasy(void) {
     printf("|          CHUONG I: xxxxxxxxx                  |\n");
     printf("+===============================================+\n\n");
     
-    SLEEP(1000);
+    Sleep(1000);
     playStoryFromFile("story_easy.txt", 30);
 
     printf("+===============================================+\n");
@@ -107,7 +107,7 @@ void showStoryNormal(void) {
     printf("|          CHUONG II: xxxxxxxxx                 |\n");
     printf("+===============================================+\n\n");
     
-    SLEEP(1000);
+    Sleep(1000);
     playStoryFromFile("story_normal.txt", 30);
 
     printf("+===============================================+\n");
@@ -124,7 +124,7 @@ void showStoryEasy(void) {
     printf("|          CHUONG III: xxxxxxxxx                |\n");
     printf("+===============================================+\n\n");
     
-    SLEEP(1000);
+    Sleep(1000);
     playStoryFromFile("story_hard.txt", 30);
 
     printf("+===============================================+\n");
@@ -137,7 +137,7 @@ void showStoryEasy(void) {
 
 // 
 
-int checkSecretEnding (GameProrogress *progress) {
+int checkSecretEnding (GameProgress *progress) {
     return (progress->easyCompleted && progress->normalCompleted && progress->hardCompleted);
 }
 
@@ -149,7 +149,7 @@ void showSecretEnding (void) {
     printf("|                                               |\n");
     printf("+===============================================+\n\n");
     
-    SLEEP(2000);
+    Sleep(2000);
     playStoryFromFile("story_hard.txt", 30);
 
     printf("+===============================================+\n");
@@ -161,7 +161,7 @@ void showSecretEnding (void) {
     printf("|                                               |\n");
     printf("+===============================================+\n\n");
 
-    SLEEP(2000);
+    Sleep(2000);
 
     printf(" 👑👑👑 THANK YOU FOR PLAYING 👑👑👑 \n\n");
 
@@ -171,7 +171,7 @@ void showSecretEnding (void) {
 
 // MENU PROGRESS
 
-void showProgressMenu (GameProrogress *progress) {
+void showProgressMenu(GameProgress *progress) {
     printf("\n");
     printf("+===============================================+\n");
     printf("|          CHUONG III: xxxxxxxxx                |\n");

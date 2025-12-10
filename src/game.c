@@ -16,11 +16,15 @@
 #include "input.h"
 #include "enemy.h"
 #include "map.h"
+#include "story.h"
 
 
 #define MAX_OXY 100
 #define TIME_LIMIT 180
 #define MAX_ENEMIES 11
+
+
+static GameProgress gameProgress;
 
 int playerFacing = 1; // 0=left, 1=right
 
@@ -113,18 +117,24 @@ void drawOxyBar(int oxy) {
 }
 
 int selectDifficulty() {
+    loadProgress(&gameProgress);
     // playMenuSound(); // CHÈN CODE PHÁT NHẠC MENU Ở ĐÂY
     printf("\033[2J\033[H");
     fflush(stdout);
 
+    showProgressMenu(&gameProgress);
     printf("\n");
     printf("+===========================================+\n");
     printf("|       CHON DO KHO - SELECT DIFFICULTY     |\n");
     printf("+===========================================+\n");
     printf("\n");
     printf("  1. DE (EASY)           - 3 Quai vat\n");
-    printf("  2. TRUNG BINH (NORMAL) - 7 Quai vat\n");
-    printf("  3. KHO (HARD)          - 11 Quai vat (!)\n");
+    printf("  2. TRUNG BINH (NORMAL) - 7 Quai vat\n"),
+            gameProgress.easyCompleted ? "" : "[LOCKED]";
+    printf("  3. KHO (HARD)          - 11 Quai vat (!)\n"),
+            gameProgress.normalCompleted ? "" : "[LOCKED]";
+    printf("  4.. SECRET ENDING           %s\n"),
+            checkSecretEnding(&gameProgress) ? "" : "[LOCKED]";
     printf("\n");
     printf("     *** CHU Y: Che do KHO cuc ky kho! ***\n");
     printf("\n");
@@ -134,12 +144,48 @@ int selectDifficulty() {
     char choice;
     while (1) {
         choice = getchar();
-        if (choice == '1' || choice == '2' || choice == '3') {
+        
+        if (choice == '1') {
             int c;
             while ((c = getchar()) != '\n' && c != EOF);
-            return choice - '0';
+            return 1;
         }
-    }
+        else if (choice == '2') {
+            if (!gameProgress.easyCompleted) {
+                printf("\nBan can hoan thanh MODE DE truoc!\n");
+                Sleep(2000);
+                return selectDifficulty();
+            }
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            return 2;
+        }
+        else if (choice == '3') {
+            if (!gameProgress.normalCompleted) {
+                printf("\nBan can hoan thanh MODE TRUNG BINH truoc!\n");
+                Sleep(2000);
+                return selectDifficulty();
+            }
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            return 3;
+        }
+        else if (choice == '4') {
+            if (checkSecretEnding(&gameProgress)) {
+                int c;
+                while ((c = getchar()) != '\n' && c != EOF);
+                showSecretEnding();
+                return selectDifficulty();
+            } else {
+                printf("\nChua mo khoa! Hoan thanh 3 mode de xem Secret Ending!\n");
+                Sleep(2000);
+                return selectDifficulty();
+            }
+        }
+        
+
+        }
+    
 }
 
 void startGame() {
@@ -345,11 +391,21 @@ void startGame() {
                 printf("╚═══════════════════════════════════════╝\n");
                 printf("\nBan da thoat khoi me cung!\n");
                 printf("Do kho: ");
-                if (difficulty == 1) printf("DE\n");
-                else if (difficulty == 2) printf("TRUNG BINH\n");
-                else printf("KHO\n");
+                if (difficulty == 1){
+                     printf("DE\n");
+                gameProgress.easyCompleted = 1;
+            }
+                else if (difficulty == 2){
+                     printf("TRUNG BINH\n");
+                gameProgress.normalCompleted = 1;
+                }
+                else{
+                     printf("KHO\n");
+                gameProgress.hardCompleted = 1;
+            }
                 printf("Thoi gian: %d giay\n", elapsed);
                 printf("OXY con lai: %d%%\n\n", oxy);
+                saveProgress(&gameProgress);
 
                 Sleep(2000);
                 break;
@@ -358,7 +414,27 @@ void startGame() {
                 // #else
                 // sleep(2);
                 // #endif
+      getchar();
+                if (difficulty == 1)
+                {
+                    showStoryEasy();
+                }
+                else if (difficulty == 2)
+                {
+                    showStoryNormal();
+                }
+                else if (difficulty == 3)
+                {
+                    showStoryHard();
 
+                    // Kiểm tra secret ending
+                    if (checkSecretEnding(&gameProgress))
+                    {
+                        printf("\n\033[1;33m[!] MOT BI MAT DA MO RA...\033[0m\n");
+                        Sleep(2000);
+                        showSecretEnding();
+                    }
+                }
                 running = 0;
             }
         }

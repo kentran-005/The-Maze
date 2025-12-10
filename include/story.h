@@ -7,26 +7,27 @@ typedef struct {
     int easyCompleted;
     int normalCompleted;
     int hardCompleted;
-} GameProrogress;
+} GameProgress;
 
 // load/save progress
 
-void loadProgress(GameProrogress *progress);
-void saveProgress(GameProrogress *progress);
+void loadProgress(GameProgress *progress);
+void saveProgress(GameProgress *progress);
 
 // show story after completing the game
 
 void showStoryEasy (void);
 void showStoryNormal (void);
 void showStoryHard (void);
+void typeText(const char *text, int delayMs);
 
 // check/show secret ending
 
-int checkSecretEnding(GameProrogress *propress);
+int checkSecretEnding(GameProgress *propress);
 void showSecretEnding (void);
 
 // Menu progress
 
-void showProgressMenu(GameProrogress *progress);
+static void showProgressMenu(GameProgress *progress);
 
 #endif
