@@ -33,4 +33,6 @@ void showSecretEnding (void);
 
 void showProgressMenu(GameProgress *progress);
 
+void showPrologue(void);
+
 #endif

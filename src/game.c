@@ -119,7 +119,7 @@ void drawOxyBar(int oxy) {
 
 int selectDifficulty() {
     loadProgress(&gameProgress);
-    playMenuSound(); // Phat nhac menu
+    playInGame(); // Phat nhac menu
     printf("\033[2J\033[H");
     fflush(stdout);
 
@@ -183,7 +183,7 @@ int selectDifficulty() {
         
 
         }
-    
+        
 }
 
 void startGame() {
@@ -191,6 +191,14 @@ void startGame() {
     enterFullscreenConsole();
 
     int difficulty = selectDifficulty();
+    // Nếu Easy -> chạy đoạn mở đầu trước khi vào game
+if (difficulty == 1) {
+    leaveFullscreenConsole();  // THOÁT FULLSCREEN để xem story
+    stopInGame();              // tắt nhạc
+    showPrologue();            // HIỂN THỊ CUTSCENE
+    playInGame();              // bật nhạc gameplay
+    enterFullscreenConsole();  // vào lại fullscreen để vào game
+}
     int numEnemies = 0;
 
     switch(difficulty) {
@@ -271,7 +279,7 @@ void startGame() {
 
         // Het OXY
         if (oxy <= 0) {
-            //stopInGame(); // DUNG NHAC TRONG GAME O DAY
+            stopInGame();
 
             playDrowningSound(); // CHÈN CODE PHÁT NHẠC ĐUỐI NƯỚC Ở ĐÂY
 
@@ -300,6 +308,7 @@ void startGame() {
 
                 if (!running) {
                     // CHỈ GỌI MỖI HÀM DỪNG NHẠC NỀN Ở ĐÂY
+                    stopInGame();
                     playPlayerKilled(); // CHÈN CODE PHÁT NHẠC NGƯỜI CHƠI BỊ GIẾT Ở ĐÂY
 
                     clearScreen();
@@ -385,6 +394,7 @@ void startGame() {
 
 
                 // CHÈN NHẠC VICTORY Ở ĐÂY
+                stopInGame();
                 playVictoryMusic(); // CHÈN CODE PHÁT NHẠC CHIẾN THẮNG Ở ĐÂY
 
                 clearScreen();

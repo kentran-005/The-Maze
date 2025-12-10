@@ -14,8 +14,10 @@ void playVictoryMusic(void); //nhac chien thang
 void playSuka(void); //nhac khi quai vat bi nguoi choi diet
 void playPlayerKilled(void); //nhac khi nguoi choi bi quai vat diet
 void playMenuSound(void); //nhac menu
+void stopMenuSound(void);
 void playDrowningSound(void); //nhac khi het oxy
 void playInGame(void); //nhac khi dang choi
+void stopInGame(void);
 
 
 #endif

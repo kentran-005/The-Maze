@@ -1,28 +1,40 @@
+# Compiler
 CC = gcc
-CFLAGS = -I include -Wall
-SRC = main.c src/*.c
 
+# Flags
+CFLAGS = -I include -Wall
+SRC = main.c $(wildcard src/*.c)
+OBJ = $(SRC:.c=.o)
+
+# Detect OS
 ifeq ($(OS),Windows_NT)
     TARGET = game.exe
     LIBS = -lwinmm
-    LDFLAGS = -lwinmm
     RM = del /Q
+    SEP = \\
 else
     TARGET = game
     LIBS =
-    LDFLAGS =
     RM = rm -f
+    SEP = /
 endif
 
+# Default rule
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(SRC) $(CFLAGS) -o $(TARGET) $(LIBS)
+# Link
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET) $(LIBS)
 
+# Compile each .c -> .o
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Clean
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) $(OBJ)
 
-# PHẦN QUAN TRỌNG – SỬA ĐÚNG CÚ PHÁP
+# Run
 run: $(TARGET)
 ifeq ($(OS),Windows_NT)
 	@$(TARGET)

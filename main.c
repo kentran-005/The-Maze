@@ -7,7 +7,7 @@ int main() {
     char choice;
 
     // TẠO AUDIO
-    // initAudio();
+    initAudio();
 
     do {
         // Xóa màn hình trước khi bắt đầu
@@ -29,7 +29,7 @@ int main() {
         // ===== PHẦN ĐÃ SỬA: KIỂM TRA Y / N HỢP LỆ =====
         do {
             printf("\n╔═══════════════════════════════════════╗\n");
-            printf("║  Ban co muon choi lai khong?         ║\n");
+            printf("║  Ban co muon choi lai khong?          ║\n");
             printf("╚═══════════════════════════════════════╝\n");
             printf("Nhap (y/n): ");
             scanf(" %c", &choice);
@@ -64,7 +64,7 @@ int main() {
     printf("\n");
 
     // DỌN DẸP AUDIO
-    // cleanupAudio();
+    cleanupAudio();
 
     return 0;
 }
