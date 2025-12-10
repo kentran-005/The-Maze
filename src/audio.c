@@ -84,6 +84,7 @@ void playLossMusic(void) {
     // Logic chỉ chạy nếu fork() thành công và đây là tiến trình con.
     if (sfxPid == 0) {
         // Child process
+        
         int devnull = open("/dev/null", O_WRONLY);
         if (devnull != -1) {
             dup2(devnull, STDERR_FILENO);
@@ -119,6 +120,7 @@ void playVictoryMusic(void) {
     
     if (sfxPid == 0) {
         // Child process
+        // Ken: thêm 
         int devnull = open("/dev/null", O_WRONLY);
         if (devnull != -1) {
             dup2(devnull, STDERR_FILENO);
