@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+#include "audio.h"
 #define ENEMY_SPEED 2
 #define CHASE_RANGE 8
 #define DIR_CHANGE 8

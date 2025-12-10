@@ -17,6 +17,7 @@
 #include "enemy.h"
 #include "map.h"
 #include "story.h"
+#include "audio.h"
 
 
 #define MAX_OXY 100
