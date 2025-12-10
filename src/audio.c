@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include <AudioToolbox/AudioToolbox.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -12,6 +11,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <AudioToolbox/AudioToolbox.h>
 #endif
 
 #if AUDIO_DISABLED

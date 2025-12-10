@@ -242,6 +242,7 @@ void saveProgress(GameProgress *progress) {
     fclose(f);
 }
 
+
 void showStoryEasy(void) {
     showInterludeAfterEasy();
 }
