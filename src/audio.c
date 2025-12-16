@@ -6,7 +6,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#if defined(_MSC_VER)
 #pragma comment(lib, "winmm.lib")
+#endif
 #else
 #include <unistd.h>
 #include <signal.h>
@@ -16,11 +18,7 @@
 #if AUDIO_DISABLED
 
 // ===== GLOBAL VARIABLES =====
-#ifdef _WIN32
-static HANDLE bgMusicHandle = NULL;
-static HANDLE menuMusicHandle = NULL;
-static HANDLE ingameMusicHandle = NULL;
-#else
+#ifndef _WIN32
 static pid_t bgMusicPid = -1;           // nhạc nền
 static pid_t menuMusicPid = -1;         // nhạc menu
 static pid_t ingameMusicPid = -1;       // nhạc trong game
@@ -72,7 +70,7 @@ static void playSoundEffect(const char *filename) {
 // ===== MENU MUSIC =====
 void playMenuSound(void) {
 #ifdef _WIN32
-    PlaySound("assets/MenuSound.wav", NULL, SND_FILENAME | SND_ASYNC);
+    PlaySound("assets/SoundPlaying.wav", NULL, SND_FILENAME | SND_ASYNC);
 #else
     menuMusicPid = fork();
 
@@ -84,9 +82,9 @@ void playMenuSound(void) {
         }
 
         #ifdef __APPLE__
-        execlp("afplay", "afplay", "-q", "1", "assets/MenuSound.wav", NULL);
+        execlp("afplay", "afplay", "-q", "1", "assets/SoundPlaying.wav", NULL);
         #else
-        execlp("aplay", "aplay", "-q", "assets/MenuSound.wav", NULL);
+        execlp("aplay", "aplay", "-q", "assets/SoundPlaying.wav", NULL);
         #endif
 
         exit(1);
@@ -97,6 +95,9 @@ void playMenuSound(void) {
 }
 
 void stopMenuSound(void) {
+#ifdef _WIN32
+    PlaySound(NULL, 0, 0);
+#endif
 #ifndef _WIN32
     if (menuMusicPid > 0) {
         kill(menuMusicPid, SIGTERM);
@@ -133,7 +134,8 @@ void playBackgroundMusic(void) {
 void stopBackgroundMusic(void) {
 #ifdef _WIN32
     PlaySound(NULL, 0, 0);
-#else
+#endif
+#ifndef _WIN32
     if (bgMusicPid > 0) {
         kill(bgMusicPid, SIGTERM);
         waitpid(bgMusicPid, NULL, 0);
@@ -170,6 +172,9 @@ void playInGame(void) {
 }
 
 void stopInGame(void) {
+#ifdef _WIN32
+    PlaySound(NULL, 0, 0);
+#endif
 #ifndef _WIN32
     if (ingameMusicPid > 0) {
         kill(ingameMusicPid, SIGTERM);
@@ -207,6 +212,9 @@ void playVictoryMusic(void) {
 }
 
 void stopVictoryMusic(void) {
+#ifdef _WIN32
+    PlaySound(NULL, 0, 0);
+#endif
 #ifndef _WIN32
     if (victoryMusicPid > 0) {
         kill(victoryMusicPid, SIGTERM);
