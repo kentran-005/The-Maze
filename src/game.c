@@ -390,11 +390,11 @@ if (difficulty == 1) {
             // Kiem tra Victory
             if (isExit(x, y)) { //oke
                 // DỪNG NHẠC NỀN Ở ĐÂY
-                //stopInGame(); // DUNG NHAC TRONG GAME O DAY
 
 
                 // CHÈN NHẠC VICTORY Ở ĐÂY
                 stopInGame();
+                Sleep(100);
                 playVictoryMusic(); // CHÈN CODE PHÁT NHẠC CHIẾN THẮNG Ở ĐÂY
 
                 clearScreen();
@@ -426,7 +426,7 @@ if (difficulty == 1) {
                 // #else
                 // sleep(2);
                 // #endif
-      getchar();
+                getchar();
                 if (difficulty == 1)
                 {
                     showStoryEasy();
@@ -447,8 +447,9 @@ if (difficulty == 1) {
                         showSecretEnding();
                     }
                 }
-                break;
+                stopVictoryMusic();
                 running = 0;
+                break;
             }
         }
 

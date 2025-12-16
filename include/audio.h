@@ -18,6 +18,7 @@ void stopMenuSound(void);
 void playDrowningSound(void); //nhac khi het oxy
 void playInGame(void); //nhac khi dang choi
 void stopInGame(void);
+void stopVictoryMusic(void);
 
 
 #endif
