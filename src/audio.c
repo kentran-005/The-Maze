@@ -15,19 +15,19 @@
 
 #if AUDIO_DISABLED
 
-// Lưu trữ process ID cho các nhạc nền
+// ===== GLOBAL VARIABLES =====
 #ifdef _WIN32
 static HANDLE bgMusicHandle = NULL;
 static HANDLE menuMusicHandle = NULL;
 static HANDLE ingameMusicHandle = NULL;
 #else
-static pid_t bgMusicPid = -1;      // nhạc nền
-static pid_t menuMusicPid = -1;    // nhạc menu
-static pid_t ingameMusicPid = -1;  // nhạc trong game
-static pid_t victoryMusicPid = -1;
+static pid_t bgMusicPid = -1;           // nhạc nền
+static pid_t menuMusicPid = -1;         // nhạc menu
+static pid_t ingameMusicPid = -1;       // nhạc trong game
+static pid_t victoryMusicPid = -1;      // nhạc chiến thắng
 #endif
 
-// ===== KHỞI TẠO VÀ DỌN DẸP HỆ THỐNG AUDIO =====
+// ===== INIT & CLEANUP =====
 void initAudio(void) {
     printf("[Audio] System initialized\n");
 }
@@ -36,10 +36,11 @@ void cleanupAudio(void) {
     stopBackgroundMusic();
     stopMenuSound();
     stopInGame();
+    stopVictoryMusic();
     printf("[Audio] System cleaned up\n");
 }
 
-// ===== HÀM HỖ TRỢ CHUNG =====
+// ===== HELPER FUNCTION =====
 // Hàm tiện ích để phát âm thanh SFX (không loop)
 static void playSoundEffect(const char *filename) {
 #ifdef _WIN32
@@ -68,9 +69,11 @@ static void playSoundEffect(const char *filename) {
 #endif
 }
 
-// ===== NHẠC MENU =====
+// ===== MENU MUSIC =====
 void playMenuSound(void) {
-#ifndef _WIN32
+#ifdef _WIN32
+    PlaySound("assets/MenuSound.wav", NULL, SND_FILENAME | SND_ASYNC);
+#else
     menuMusicPid = fork();
 
     if (menuMusicPid == 0) {
@@ -103,7 +106,7 @@ void stopMenuSound(void) {
 #endif
 }
 
-// ===== NHẠC NỀN =====
+// ===== BACKGROUND MUSIC =====
 void playBackgroundMusic(void) {
 #ifdef _WIN32
     PlaySound("assets/SoundPlaying.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
@@ -139,9 +142,11 @@ void stopBackgroundMusic(void) {
 #endif
 }
 
-// ===== NHẠC TRONG GAME =====
+// ===== IN-GAME MUSIC =====
 void playInGame(void) {
-#ifndef _WIN32
+#ifdef _WIN32
+    PlaySound("assets/SoundPlaying.wav", NULL, SND_FILENAME | SND_ASYNC);
+#else
     ingameMusicPid = fork();
 
     if (ingameMusicPid == 0) {
@@ -174,6 +179,7 @@ void stopInGame(void) {
 #endif
 }
 
+// ===== VICTORY MUSIC =====
 void playVictoryMusic(void) {
 #ifdef _WIN32
     PlaySound("assets/VictoryN.wav", NULL, SND_FILENAME | SND_ASYNC);
@@ -210,7 +216,7 @@ void stopVictoryMusic(void) {
 #endif
 }
 
-// ===== HIỆU ỨNG ÂM THANH =====
+// ===== SOUND EFFECTS =====
 void playLossMusic(void) {
     playSoundEffect("assets/lossmusic.wav");
 }
