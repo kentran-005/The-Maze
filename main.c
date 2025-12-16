@@ -84,9 +84,9 @@ int main(void) {
         getchar();
 
         // PHÁT NHẠC NỀN VÀ BẮT ĐẦU GAME
-        playBackgroundMusic();
+        playInGame();
         startGame();
-        stopBackgroundMusic();
+        stopInGame();
 
         // HỎI CHƠI LẠI
         if (!askPlayAgain()) {
